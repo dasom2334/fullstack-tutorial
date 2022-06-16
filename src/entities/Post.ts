@@ -8,7 +8,7 @@ export class Post {
   @PrimaryKey()
   _id!: number;
 
-  @Property({ })
+  @Property()
   createdAt?: Date = new Date();
 
   @Property({ onUpdate: () => new Date() })

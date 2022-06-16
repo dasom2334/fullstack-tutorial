@@ -3,11 +3,11 @@
 Fullstack React GraphQL TypeScript Tutorial
 https://www.youtube.com/watch?v=I6ypD7qv3Z8
 
-current 32:29
+current 59:58
 
-0:00:00 Intro
-0:02:02 Node/TypeScript Setup
-0:11:29 MikroORM Setup
+0:00:00 ~~Intro~~
+0:02:02 ~~Node/TypeScript Setup~~
+0:11:29 ~~MikroORM Setup~~
 0:39:50 Apollo Server Express Setup
 0:47:32 MikroORM TypeGraphQL Crud
 1:09:23 Register Resolver
