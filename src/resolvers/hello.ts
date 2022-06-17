@@ -6,4 +6,8 @@ export class HelloResolver {
     hello() {
         return "hello world";
     }
+    @Query(() => String)
+    hello2() {
+        return "hello world and you";
+    }
 }
