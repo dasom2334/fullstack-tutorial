@@ -8,9 +8,9 @@ current 1:23:27
 0:00:00 ~~Intro~~<br>
 0:02:02 ~~Node/TypeScript Setup~~<br>
 0:11:29 ~~MikroORM Setup~~<br>
-0:39:50 Apollo Server Express Setup<br>
-0:47:32 MikroORM TypeGraphQL Crud<br>
-1:09:23 Register Resolver<br>
+0:39:50 ~~Apollo Server Express Setup~~<br>
+0:47:32 ~~MikroORM TypeGraphQL Crud~~<br>
+1:09:23 ~~Register Resolver~~<br>
 1:23:27 Login Resolver<br>
 1:41:11 Session Authentication<br>
 2:03:06 Sessions Explained<br>
