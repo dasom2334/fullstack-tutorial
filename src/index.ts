@@ -9,9 +9,9 @@ import { HelloResolver } from "./resolvers/hello";
 import { PostResolver } from "./resolvers/Post";
 import "reflect-metadata";
 import { UserResolver } from "./resolvers/User";
-import session from 'express-session';
+import session from "express-session";
 import { createClient } from "redis";
-import connectRedis from 'connect-redis';
+import connectRedis from "connect-redis";
 
 const main = async () => {
   const orm = await MikroORM.init(mikroConfig);
@@ -27,51 +27,42 @@ const main = async () => {
   let RedisStore = connectRedis(session);
   // const { createClient } = require("redis")
 
-  // const redisClient = createClient({ 
+  // const redisClient = createClient({
   //   legacyMode: true,
   //   url: '127.0.0.1:6379',
   // });
   // await redisClient.connect().catch(console.error);
 
-  let redisClient = createClient({ legacyMode: true })
-  redisClient.connect().catch(console.error)
-  // const redisClient = createClient(); 
+  let redisClient = createClient({ legacyMode: true });
+  redisClient.connect().catch(console.error);
+  // const redisClient = createClient();
 
   app.use(
     session({
+      name: "qid",
       store: new RedisStore({
-         client: redisClient as any,
-         disableTouch: true,
-         disableTTL: true,
-        }),
+        client: redisClient as any,
+        disableTouch: true,
+        disableTTL: true,
+      }),
+      cookie: {
+        maxAge: 10000* 60 * 60 * 24 * 365 * 10, // 10 years,,
+        httpOnly: true,
+        secure: __prod__,
+        sameSite: 'lax',
+      },
       saveUninitialized: false,
       secret: "keyboard cat",
       resave: false,
     })
-  )
-//   const RedisStore = connectRedis(session);
-//   const redisClient = createClient({ legacyMode: true });
-//   redisClient.connect().catch(console.error);
-
-//   app.use(
-//     session({
-//       store: new RedisStore({ 
-//         // client: redisClient,
-//             client: redisClient,
-//             disableTouch: true,
-//         }),
-//       saveUninitialized: false,
-//       secret: "IMissYouZesu",
-//       resave: false,
-//     })
-//   );
+  );
 
   const apolloServer = new ApolloServer({
     schema: await buildSchema({
       resolvers: [HelloResolver, PostResolver, UserResolver],
       validate: false,
     }),
-    context: () => ({ em: orm.em }),
+    context: ({req, res}) => ({ em: orm.em, req, res }),
   });
   await apolloServer.start();
 
