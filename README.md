@@ -3,7 +3,7 @@
 Fullstack React GraphQL TypeScript Tutorial
 https://www.youtube.com/watch?v=I6ypD7qv3Z8
 
-current 1:41:11
+current 2:10:40
 
 0:00:00 ~~Intro~~<br>
 0:02:02 ~~Node/TypeScript Setup~~<br>
@@ -12,8 +12,8 @@ current 1:41:11
 0:47:32 ~~MikroORM TypeGraphQL Crud~~<br>
 1:09:23 ~~Register Resolver~~<br>
 1:23:27 ~~Login Resolver~~<br>
-1:41:11 Session Authentication<br>
-2:03:06 Sessions Explained<br>
+1:41:11 ~~Session Authentication~~<br>
+2:03:06 ~~Sessions Explained~~<br>
 2:08:24 Next.js + Chakra<br>
 2:32:36 URQL Basics<br>
 2:46:07 GraphQL Code Generator<br>
