@@ -14,9 +14,7 @@ import argon2 from "argon2";
 import { UniqueConstraintViolationException } from "@mikro-orm/core";
 
 export interface userSession {
-  cookie: {
-    userId:number;
-  }
+  userId:number;
 }
 
 @InputType()
@@ -51,10 +49,10 @@ export class UserResolver {
   async me(@Ctx() { req, em }: MyContext) {
     console.log(req.session);
 
-    if (!req.session.cookie.userId) {
+    if (!req.session.userId) {
       return null;
     }
-    const user = await em.findOne(User, { _id: req.session.cookie.userId });
+    const user = await em.findOne(User, { _id: req.session.userId });
     return user;
   }
 
@@ -136,9 +134,7 @@ export class UserResolver {
       };
     }
 
-    req.session!.cookie.userId = user._id;
-    console.log(req.session);
-    console.log(user._id);
+    req.session!.userId = user._id;
     return {
       user,
     };
