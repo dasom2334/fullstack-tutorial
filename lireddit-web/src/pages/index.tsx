@@ -5,11 +5,9 @@ import {
   List,
   ListIcon,
   ListItem,
-} from '@chakra-ui/react'
-import { CheckCircleIcon, LinkIcon } from '@chakra-ui/icons'
+} from "@chakra-ui/react";
+import { CheckCircleIcon, LinkIcon } from "@chakra-ui/icons";
 
-const Index = () => (
-  <div>Hello World</div>
-)
+const Index = () => <div>Hello World</div>;
 
-export default Index
+export default Index;
