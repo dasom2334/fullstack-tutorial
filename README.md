@@ -30,7 +30,7 @@ current 2:32:36
 6:02:26 Global Error Handling<br>
 6:24:15 Next.js Query Params<br>
 6:31:26 URQL Pagination Start<br>
-6:50:02  Adding Mock Data<br>
+6:50:02 Adding Mock Data<br>
 7:01:19 Chakra Styling<br>
 7:12:37 More URQL Pagination<br>
 7:32:07 Fix Mock Data<br>
