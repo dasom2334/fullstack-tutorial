@@ -4,6 +4,7 @@ import { Box, Button, FormControl, FormLabel, Input } from "@chakra-ui/react";
 import { Wrapper } from "../components/Wrapper";
 import { InputField } from "../components/InputField";
 import { useMutation } from "urql";
+import { useRegisterMutation } from "../generated/graphql";
 // import {FormControl, FormErrorMessage, FormLabel, Input} from '@chakra-ui/react';
 interface registerProps {}
 
@@ -23,7 +24,8 @@ mutation Register($username:String!, $password:String!) {
 `;
 
 const Register: React.FC<registerProps> = ({}) => {
-  const [, register] = useMutation(REGISTER_MUT);
+  // const [, register] = useMutation(REGISTER_MUT);
+  const [, register] = useRegisterMutation();
 
   return (
     <Wrapper variant="small">
