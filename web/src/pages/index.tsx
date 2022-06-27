@@ -1,13 +1,10 @@
-import {
-  Link as ChakraLink,
-  Text,
-  Code,
-  List,
-  ListIcon,
-  ListItem,
-} from "@chakra-ui/react";
-import { CheckCircleIcon, LinkIcon } from "@chakra-ui/icons";
+import { NavBar } from "../components/NavBar";
 
-const Index = () => <div>Hello World</div>;
+const Index = () => (
+  <>
+    <NavBar />
+    <div>Hello World</div>
+  </>
+);
 
 export default Index;

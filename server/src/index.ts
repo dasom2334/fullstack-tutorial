@@ -1,5 +1,5 @@
 import { MikroORM } from "@mikro-orm/core";
-import { __prod__ } from "./constants";
+import { COOKIE_NAME, __prod__ } from "./constants";
 // import { Post } from "./entities/Post";
 import mikroConfig from "./mikro-orm.config";
 import express from "express";
@@ -33,21 +33,35 @@ const main = async () => {
   //   url: '127.0.0.1:6379',
   // });
   // await redisClient.connect().catch(console.error);
-
   let redisClient = createClient({ legacyMode: true });
   redisClient.connect().catch(console.error);
   // const redisClient = createClient();
 
-  app.use(
-    cors({
-      origin: "http://localhost:3000",
-      credentials: true,
-    })
-  );
-
+  // const whitelist = [
+  //   "http://localhost:3000",
+  //   "https://localhost:3000",
+  //   "https://studio.apollographql.com",
+  // ];
+  const corsOptions = {
+    origin: "http://localhost:3000",
+    // origin: "https://studio.apollographql.com",
+    // origin: function (
+    //   origin: string | undefined,
+    //   callback: (err: Error | null, origin?: boolean) => void
+    // ): void {
+    //   console.log(origin);
+    //   console.log(callback);
+    //   if (typeof origin == "string" && whitelist.indexOf(origin) !== -1) {
+    //       callback(null, true);
+    //   }
+    //   callback(new Error("Not allowed by CORS"));
+    // }, // codegen not worked.
+    credentials: true,
+  };
+  app.use(cors(corsOptions));
   app.use(
     session({
-      name: "qid",
+      name: COOKIE_NAME,
       store: new RedisStore({
         client: redisClient as any,
         disableTouch: true,

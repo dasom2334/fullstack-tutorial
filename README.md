@@ -3,7 +3,7 @@
 Fullstack React GraphQL TypeScript Tutorial
 https://www.youtube.com/watch?v=I6ypD7qv3Z8
 
-current 2:46:07
+current 3:50:25
 
 0:00:00 ~~Intro~~<br>
 0:02:02 ~~Node/TypeScript Setup~~<br>
@@ -16,11 +16,11 @@ current 2:46:07
 2:03:06 ~~Sessions Explained~~<br>
 2:08:24 ~~Next.js + Chakra~~<br>
 2:32:36 ~~URQL Basics~~<br>
-2:46:07 GraphQL Code Generator<br>
-2:53:16 Register Error Handling<br>
-3:10:57 NavBar<br>
-3:26:21 URQL Cache Updates<br>
-3:39:33 Logout<br>
+2:46:07 ~~GraphQL Code Generator~~<br>
+2:53:16 ~~Register Error Handling~~<br>
+3:10:57 ~~NavBar~~<br>
+3:26:21 ~~URQL Cache Updates~~<br>
+3:39:33 ~~Logout~~<br>
 3:50:11 Next.js URQL SSR<br>
 4:12:34 Forgot Password<br>
 4:35:31 Change Password<br>
