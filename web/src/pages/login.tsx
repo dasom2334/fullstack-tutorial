@@ -1,29 +1,29 @@
-import React from "react";
-import { Formik, Form, Field } from "formik";
-import { Box, Button, FormControl, FormLabel, Input } from "@chakra-ui/react";
-import { Wrapper } from "../components/Wrapper";
-import { InputField } from "../components/InputField";
-import { useMutation } from "urql";
-import { useLoginMutation } from "../generated/graphql";
-import { toErrorMap } from "../utils/toErrorMap";
+import { Box, Button } from "@chakra-ui/react";
+import { Form, Formik } from "formik";
+import { withUrqlClient } from "next-urql";
 import { useRouter } from "next/router";
-// import {FormControl, FormErrorMessage, FormLabel, Input} from '@chakra-ui/react';
+import React from "react";
+import { InputField } from "../components/InputField";
+import { Wrapper } from "../components/Wrapper";
+import { useLoginMutation } from "../generated/graphql";
+import { createUrqlClient } from "../utils/createUrqlClient";
+import { toErrorMap } from "../utils/toErrorMap";
 interface loginProps {}
 
-const REGISTER_MUT = `
-mutation Login($username:String!, $password:String!) {
-  login(options: {username:$username, password:$password}) {
-    errors {
-      field
-      message
-    }
-    user {
-      _id
-      username
-    }
-  }
-}
-`;
+// const REGISTER_MUT = `
+// mutation Login($username:String!, $password:String!) {
+//   login(options: {username:$username, password:$password}) {
+//     errors {
+//       field
+//       message
+//     }
+//     user {
+//       _id
+//       username
+//     }
+//   }
+// }
+// `;
 
 const Login: React.FC<loginProps> = ({}) => {
   // const [, login] = useMutation(REGISTER_MUT);
@@ -36,12 +36,12 @@ const Login: React.FC<loginProps> = ({}) => {
         initialValues={{ username: "", password: "" }}
         onSubmit={async (values, { setErrors }) => {
           // console.log(values);
-          const response = await login({options:values});
+          const response = await login({ options: values });
           if (response.data?.login.errors) {
             [{ field: "username", message: "somthing wrong" }];
             setErrors(toErrorMap(response.data.login.errors));
           } else if (response.data?.login.user) {
-            console.log(response.data.login.user)
+            console.log(response.data.login.user);
             router.push("/");
           }
         }}
@@ -77,4 +77,4 @@ const Login: React.FC<loginProps> = ({}) => {
   );
 };
 
-export default Login;
+export default withUrqlClient(createUrqlClient, {ssr:true})(Login);

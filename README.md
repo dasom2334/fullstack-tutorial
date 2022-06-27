@@ -3,7 +3,7 @@
 Fullstack React GraphQL TypeScript Tutorial
 https://www.youtube.com/watch?v=I6ypD7qv3Z8
 
-current 3:50:25
+current 4:12:34
 
 0:00:00 ~~Intro~~<br>
 0:02:02 ~~Node/TypeScript Setup~~<br>
@@ -21,7 +21,7 @@ current 3:50:25
 3:10:57 ~~NavBar~~<br>
 3:26:21 ~~URQL Cache Updates~~<br>
 3:39:33 ~~Logout~~<br>
-3:50:11 Next.js URQL SSR<br>
+3:50:11 ~~Next.js URQL SSR~~<br>
 4:12:34 Forgot Password<br>
 4:35:31 Change Password<br>
 5:22:14 Why Switching to TypeORM<br>
