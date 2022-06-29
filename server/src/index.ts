@@ -10,7 +10,7 @@ import { PostResolver } from "./resolvers/Post";
 import "reflect-metadata";
 import { UserResolver } from "./resolvers/User";
 import session from "express-session";
-import { createClient } from "redis";
+import Redis from "ioredis";
 import connectRedis from "connect-redis";
 import cors from "cors";
 
@@ -18,45 +18,32 @@ const main = async () => {
   const orm = await MikroORM.init(mikroConfig);
   // await orm.em.nativeDelete(User, {});
   await orm.getMigrator().up();
-  // const post = orm.em.fork({}).create(Post, {title: 'my first post'});
-  // await orm.em.persistAndFlush(post);
-  // await orm.em.nativeInsert(Post, {title: 'my second post'});
 
-  // const posts = await orm.em.find(Post, {});
-  // console.log(posts);
   const app = express();
 
   let RedisStore = connectRedis(session);
-  // const { createClient } = require("redis")
 
-  // const redisClient = createClient({
-  //   legacyMode: true,
-  //   url: '127.0.0.1:6379',
-  // });
-  // await redisClient.connect().catch(console.error);
-  let redisClient = createClient({ legacyMode: true });
-  redisClient.connect().catch(console.error);
-  // const redisClient = createClient();
+  const redisClient = new Redis();
 
-  // const whitelist = [
-  //   "http://localhost:3000",
-  //   "https://localhost:3000",
-  //   "https://studio.apollographql.com",
-  // ];
+  const whitelist = [
+    "http://localhost:3000",
+    "https://localhost:3000",
+    "https://studio.apollographql.com",
+  ];
   const corsOptions = {
-    origin: "http://localhost:3000",
+    // origin: "http://localhost:3000",
     // origin: "https://studio.apollographql.com",
-    // origin: function (
-    //   origin: string | undefined,
-    //   callback: (err: Error | null, origin?: boolean) => void
-    // ): void {
-    //   console.log(origin);
-    //   console.log(callback);
-    //   if (typeof origin == "string" && whitelist.indexOf(origin) !== -1) {
-    //       callback(null, true);
-    //   }
-    //   callback(new Error("Not allowed by CORS"));
-    // }, // codegen not worked.
+    origin: function (
+      origin: string | undefined,
+      callback: (err: Error | null, origin?: boolean) => void
+    ): void {
+      console.log(origin, origin && whitelist.indexOf(origin) !== -1);
+      if (origin && whitelist.indexOf(origin) !== -1) {
+        callback(null, true);
+      } else {
+        callback(new Error("Not allowed by CORS"));
+      }
+    }, // codegen not worked.
     credentials: true,
   };
   app.use(cors(corsOptions));
@@ -85,7 +72,7 @@ const main = async () => {
       resolvers: [HelloResolver, PostResolver, UserResolver],
       validate: false,
     }),
-    context: ({ req, res }) => ({ em: orm.em, req, res }),
+    context: ({ req, res }) => ({ em: orm.em, req, res, redis:redisClient }),
   });
   await apolloServer.start();
 
@@ -94,9 +81,6 @@ const main = async () => {
     cors: false,
   });
 
-  // app.get('/', (_, res) => {
-  //     res.send('hello');
-  // });
   app.listen(4000, () => {
     console.log("server start port 4000");
   });
@@ -104,5 +88,3 @@ const main = async () => {
 main().catch((err) => {
   console.error(err);
 });
-// console.log('hiwefwefhwefwefei');
-//# sourceMappingURL=index.js.map

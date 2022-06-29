@@ -12,16 +12,22 @@ import {
 import argon2 from "argon2";
 // import { UniqueConstraintViolationException } from "@mikro-orm/core";
 import { EntityManager } from "@mikro-orm/postgresql";
-import { COOKIE_NAME } from "../constants";
+import {
+  COOKIE_NAME,
+  FORGET_PASSWORD_PREFIX,
+  TIME_ONE_DAY,
+} from "../constants";
 import { UsernamePasswordInput } from "./UsernamePasswordInput";
-import { validateRegister } from "../utils/validateRegister";
+import { validateRegister } from "../utils/validateUser";
+import { sendEmail } from "..//utils/sendEmail";
+import { v4 } from "uuid";
 
 export interface userSession {
   userId: number;
 }
 
 @ObjectType()
-class FieldError {
+export class FieldError {
   @Field()
   field!: string;
   @Field()
@@ -39,9 +45,47 @@ class UserResponse {
 
 @Resolver()
 export class UserResolver {
+  // @Mutation(() => UserResponse)
+  // async changePassword(
+  //   @Arg('token') token: string,
+  //   @Arg('newPassword') newPassword:string,
+  //   @Ctx() {}: MyContext
+  // ) {
+
+  // }
+
   @Mutation(() => Boolean)
-  async forgotPassword(@Arg("email") _email: string, @Ctx() {}: MyContext) {
-    // const user = await em.findOne(User, { email });
+  async forgotPassword(
+    @Arg("email") email: string,
+    @Ctx() { em, redis }: MyContext
+  ) {
+    const user = await em.findOne(User, { email });
+    if (!user) {
+      return true;
+    }
+    const token = v4();
+    await redis.set(
+      FORGET_PASSWORD_PREFIX + token,
+      user._id,
+      "EX",
+      TIME_ONE_DAY * 3
+      // (err) => {
+      //   if (err) {
+      //     // Something went wrong
+      //     console.error("error");
+      //  } else {
+      //   redis.get("test", function(err, value) {
+      //           if (err) {
+      //               console.error("error");
+      //           } else {
+      //               console.log("Worked: " + value);
+      //           }
+      //      });
+      //  }
+      // }
+    );
+    const html = `<a href="http://localhost:3000/change-password/${token}">Reset Password</a>`;
+    await sendEmail(email, html);
     return true;
   }
   @Query(() => User, { nullable: true })
@@ -62,6 +106,7 @@ export class UserResolver {
   ): Promise<UserResponse> {
     const errors = validateRegister(options);
     if (errors) {
+      console.log(errors);
       return { errors };
     }
     const hashedPassword = await argon2.hash(options.password);
@@ -86,20 +131,13 @@ export class UserResolver {
       user = result[0];
       // await em.persistAndFlush(user);
     } catch (err: any) {
-      let code;
-      code = err.code;
-      // if (err instanceof UniqueConstraintViolationException) code = err.code;
-      // else code = String(err);
-      if (code === "23505") {
-        return {
-          errors: [
-            {
-              field: "username",
-              message: "username already taken",
-            },
-          ],
-        };
+      const constraint = err.constraint.split("_");
+      const field = constraint[1];
+      let message = "Unhandled Error";
+      if (constraint[2] === "unique") {
+        message = `${field} already taken!`;
       }
+      return { errors: [{ field, message }] };
     }
     req.session!.userId = user._id;
     return { user };
