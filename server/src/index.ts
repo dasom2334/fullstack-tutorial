@@ -16,6 +16,7 @@ import cors from "cors";
 
 const main = async () => {
   const orm = await MikroORM.init(mikroConfig);
+  // await orm.em.nativeDelete(User, {});
   await orm.getMigrator().up();
   // const post = orm.em.fork({}).create(Post, {title: 'my first post'});
   // await orm.em.persistAndFlush(post);
