@@ -37,9 +37,11 @@ const main = async () => {
       origin: string | undefined,
       callback: (err: Error | null, origin?: boolean) => void
     ): void {
-      console.log(origin, origin && whitelist.indexOf(origin) !== -1);
       if (origin && whitelist.indexOf(origin) !== -1) {
         callback(null, true);
+      } else if (origin === undefined && !__prod__) {
+        // codegen works here
+        callback(null, true)
       } else {
         callback(new Error("Not allowed by CORS"));
       }

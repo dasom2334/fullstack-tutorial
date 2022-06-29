@@ -18,7 +18,11 @@ import {
   TIME_ONE_DAY,
 } from "../constants";
 import { UsernamePasswordInput } from "./UsernamePasswordInput";
-import { validateRegister } from "../utils/validateUser";
+import {
+  errorGenerater,
+  validateChangePassword,
+  validateRegister,
+} from "../utils/validateUser";
 import { sendEmail } from "..//utils/sendEmail";
 import { v4 } from "uuid";
 
@@ -45,14 +49,32 @@ class UserResponse {
 
 @Resolver()
 export class UserResolver {
-  // @Mutation(() => UserResponse)
-  // async changePassword(
-  //   @Arg('token') token: string,
-  //   @Arg('newPassword') newPassword:string,
-  //   @Ctx() {}: MyContext
-  // ) {
+  @Mutation(() => UserResponse)
+  async changePassword(
+    @Arg("token") token: string,
+    @Arg("newPassword") newPassword: string,
+    @Ctx() { em, redis, req }: MyContext
+  ): Promise<UserResponse> {
+    const errors = validateChangePassword(newPassword);
+    if (errors.length > 0) return { errors };
+    const key = FORGET_PASSWORD_PREFIX + token;
+    const userId = await redis.get(key);
+    if (!userId) {
+      return { errors: [errorGenerater("token", "token expired.")] };
+    }
 
-  // }
+    const user = await em.findOne(User, { _id: parseInt(userId) });
+    if (!user) {
+      return { errors:[errorGenerater("token", "user no longer exists.")]}
+    }
+    user.password = await argon2.hash(newPassword);
+    
+    await em.persistAndFlush(user);
+    await redis.del(key);
+    req.session.userId = user._id;
+
+    return { user };
+  }
 
   @Mutation(() => Boolean)
   async forgotPassword(
@@ -105,10 +127,7 @@ export class UserResolver {
     @Ctx() { em, req }: MyContext
   ): Promise<UserResponse> {
     const errors = validateRegister(options);
-    if (errors) {
-      console.log(errors);
-      return { errors };
-    }
+    if (errors.length > 0) return { errors };
     const hashedPassword = await argon2.hash(options.password);
     // const user = em.create(User, {
     //   username: options.username,
@@ -137,7 +156,7 @@ export class UserResolver {
       if (constraint[2] === "unique") {
         message = `${field} already taken!`;
       }
-      return { errors: [{ field, message }] };
+      return { errors: [errorGenerater(field, message)] };
     }
     req.session!.userId = user._id;
     return { user };
