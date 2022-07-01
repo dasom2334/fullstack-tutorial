@@ -1,23 +1,27 @@
-import { MikroORM } from "@mikro-orm/core";
+// import { MikroORM } from "@mikro-orm/core";
 import { COOKIE_NAME, __prod__ } from "./constants";
 // import { Post } from "./entities/Post";
-import mikroConfig from "./mikro-orm.config";
-import express from "express";
+// import mikroConfig from "./mikro-orm.config";
 import { ApolloServer } from "apollo-server-express";
+import connectRedis from "connect-redis";
+import cors from "cors";
+import express from "express";
+import session from "express-session";
+import Redis from "ioredis";
+import "reflect-metadata";
 import { buildSchema } from "type-graphql";
 import { HelloResolver } from "./resolvers/hello";
 import { PostResolver } from "./resolvers/Post";
-import "reflect-metadata";
 import { UserResolver } from "./resolvers/User";
-import session from "express-session";
-import Redis from "ioredis";
-import connectRedis from "connect-redis";
-import cors from "cors";
+import AppDataSource from "./typeormAppDataSource";
 
 const main = async () => {
-  const orm = await MikroORM.init(mikroConfig);
-  // await orm.em.nativeDelete(User, {});
-  await orm.getMigrator().up();
+  AppDataSource.initialize()
+    .then(() => {
+      // here you can start to work with your database
+    })
+    .catch((error) => console.log(error));
+
 
   const app = express();
 
@@ -41,7 +45,7 @@ const main = async () => {
         callback(null, true);
       } else if (origin === undefined && !__prod__) {
         // codegen works here
-        callback(null, true)
+        callback(null, true);
       } else {
         callback(new Error("Not allowed by CORS"));
       }
@@ -74,7 +78,7 @@ const main = async () => {
       resolvers: [HelloResolver, PostResolver, UserResolver],
       validate: false,
     }),
-    context: ({ req, res }) => ({ em: orm.em, req, res, redis:redisClient }),
+    context: ({ req, res }) => ({ req, res, redis: redisClient }),
   });
   await apolloServer.start();
 
