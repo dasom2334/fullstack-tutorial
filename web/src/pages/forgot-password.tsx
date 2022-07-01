@@ -41,7 +41,6 @@ export const forgotPassword: React.FC<{}> = ({}) => {
                     name="email"
                     placeholder="email"
                     label="Email"
-                    type="email"
                   />
                 </Box>
                 <Button

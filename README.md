@@ -3,7 +3,7 @@
 Fullstack React GraphQL TypeScript Tutorial
 https://www.youtube.com/watch?v=I6ypD7qv3Z8
 
-current 5:50:44
+current 6:31:26
 
 0:00:00 ~~Intro~~<br>
 0:02:02 ~~Node/TypeScript Setup~~<br>
@@ -26,9 +26,9 @@ current 5:50:44
 4:35:31 ~~Change Password~~<br>
 5:22:14 ~~Why Switching to TypeORM~~<br>
 5:25:27 ~~Switching to TypeORM~~<br>
-5:50:44 Many to One<br>
-6:02:26 Global Error Handling<br>
-6:24:15 Next.js Query Params<br>
+5:50:44 ~~Many to One~~<br>
+6:02:26 ~~Global Error Handling~~<br>
+6:24:15 ~~Next.js Query Params~~<br>
 6:31:26 URQL Pagination Start<br>
 6:50:02 Adding Mock Data<br>
 7:01:19 Chakra Styling<br>

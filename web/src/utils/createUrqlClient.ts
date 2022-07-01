@@ -15,6 +15,28 @@ import {
 } from "../generated/graphql";
 import { withUrqlClient } from "next-urql";
 import { beeterUpdateQuery } from "./beeterUpdateQuery";
+
+
+
+import { filter, pipe, tap } from 'wonka';
+import { Exchange } from 'urql';
+import router from "next/router";
+
+export const errorExchange: Exchange = ({ forward }) => ops$ => {
+  return pipe(
+    forward(ops$),
+    tap(({ error }) => {
+      // If the OperationResult has an error send a request to sentry
+      if (error) {
+        if (error?.message.includes("Not Authenticated")) {
+          router.replace("/login");
+        }
+      }
+    })
+  );
+};
+
+
 export const createUrqlClient = (ssrExchange: any) => ({
   url: "http://localhost:4000/graphql",
   fetchOptions: {
@@ -70,6 +92,7 @@ export const createUrqlClient = (ssrExchange: any) => ({
         },
       },
     }),
+    errorExchange,
     ssrExchange,
     fetchExchange,
   ],

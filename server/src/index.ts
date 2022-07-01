@@ -14,6 +14,7 @@ import { HelloResolver } from "./resolvers/hello";
 import { PostResolver } from "./resolvers/Post";
 import { UserResolver } from "./resolvers/User";
 import AppDataSource from "./typeormAppDataSource";
+// import { Post } from "./entities/Post";
 
 const main = async () => {
   AppDataSource.initialize()
@@ -22,7 +23,7 @@ const main = async () => {
     })
     .catch((error) => console.log(error));
 
-
+  // await Post.delete({});
   const app = express();
 
   let RedisStore = connectRedis(session);
