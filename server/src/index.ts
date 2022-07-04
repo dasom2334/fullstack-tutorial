@@ -19,6 +19,7 @@ import AppDataSource from "./typeormAppDataSource";
 const main = async () => {
   AppDataSource.initialize()
     .then(() => {
+      AppDataSource.runMigrations();
       // here you can start to work with your database
     })
     .catch((error) => console.log(error));

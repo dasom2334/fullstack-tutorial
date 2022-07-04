@@ -143,7 +143,6 @@ export class UserResolver {
         })
         .returning("*")
         .execute();
-        console.log(result);
 
       user = result.raw[0];
       // await em.persistAndFlush(user);

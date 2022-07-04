@@ -1,6 +1,8 @@
+import path from "path";
 import { DataSource } from "typeorm";
 import { Post } from "./entities/Post";
 import { User } from "./entities/User";
+
 
 const AppDataSource = new DataSource({
   type: "postgres",
@@ -10,6 +12,7 @@ const AppDataSource = new DataSource({
   password: "tutorial",
   database: "tutorial2",
   entities: [Post, User],
+  migrations: [path.join(__dirname, "./migrations/*")],
   synchronize: true,
   logging: true,
 });

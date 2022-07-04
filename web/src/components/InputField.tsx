@@ -8,8 +8,8 @@ import {
 import React, { InputHTMLAttributes, TextareaHTMLAttributes } from "react";
 import { useField } from "formik";
 
-type InputFieldProps = (InputHTMLAttributes<HTMLInputElement> 
-  | TextareaHTMLAttributes<HTMLTextAreaElement>) 
+type InputFieldProps = InputHTMLAttributes<HTMLInputElement>
+  & TextareaHTMLAttributes<HTMLTextAreaElement> 
   & {
     name: string;
     label: string;

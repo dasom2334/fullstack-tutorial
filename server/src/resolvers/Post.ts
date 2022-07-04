@@ -4,14 +4,17 @@ import {
   Arg,
   Ctx,
   Field,
+  FieldResolver,
   InputType,
   Int,
   Mutation,
   Query,
   Resolver,
+  Root,
   UseMiddleware,
 } from "type-graphql";
 import { Post } from "../entities/Post";
+import AppDataSource from "../typeormAppDataSource";
 
 @InputType()
 class PostInput {
@@ -21,11 +24,34 @@ class PostInput {
   @Field()
   text!: string;
 }
-@Resolver()
+@Resolver(Post)
 export class PostResolver {
+  @FieldResolver(() => String)
+  textSnippet(@Root() root: Post) {
+    return root.text.slice(0, 50);
+  }
+
   @Query(() => [Post])
-  async posts(): Promise<Post[]> {
-    return Post.find();
+  async posts(
+    @Arg("limit") limit: number,
+    @Arg("offset") offset:number = 0,
+    @Arg("cursor", () => String, { nullable: true }) cursor: string | null
+  ): Promise<Post[]> {
+    const realLimit = Math.min(50, limit);
+    const result = AppDataSource.getRepository(Post)
+      .createQueryBuilder("Post")
+      .orderBy("Post.createdAt", "DESC")
+      .addOrderBy("Post._id", "DESC")
+      .offset(offset)
+      .limit(realLimit);
+      // .take(realLimit);
+
+    if (cursor) {
+      result.where("Post.createdAt > :cursor", {
+        cursor: cursor ? new Date(cursor) : null,
+      });
+    }
+    return result.getMany();
   }
   @Query(() => Post, { nullable: true })
   post(@Arg("identifier", () => Int) _id: number): Promise<Post | null> {
@@ -54,7 +80,6 @@ export class PostResolver {
 
     if (post.creatorId !== req.session.userId) {
       return null;
-
     }
     Post.update({ _id }, { ...input });
     return post;
