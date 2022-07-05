@@ -3,6 +3,8 @@ import {
   Button,
   Flex,
   Heading,
+  Icon,
+  IconButton,
   Link,
   Stack,
   Text,
@@ -14,6 +16,8 @@ import { createUrqlClient } from "../utils/createUrqlClient";
 import NextLink from "next/link";
 import { Layout } from "../components/Layout";
 import { useState } from "react";
+import { ChevronDownIcon, ChevronUpIcon } from "@chakra-ui/icons";
+import { UpdootSection } from "../components/UpdootSection";
 
 const Index = () => {
   const [variables, setVariables] = useState({
@@ -42,11 +46,14 @@ const Index = () => {
         ) : (
           <Stack spacing={8}>
             {data.posts.map((p) => (
-              <Box key={p._id} p={5} shadow="md" borderWidth={1}>
-                <Heading fontSize="xl">{p.title}</Heading>
-                <Text>posted by {p.creator.username}</Text>
-                <Text mt={4}>{p.textSnippet}</Text>
-              </Box>
+              <Flex key={p._id} p={5} shadow="md" borderWidth={1}>
+                <UpdootSection post={p} />
+                <Box ml={2}>
+                  <Heading fontSize="xl">{p.title}</Heading>
+                  <Text>posted by {p.creator.username}</Text>
+                  <Text mt={4}>{p.textSnippet}</Text>
+                </Box>
+              </Flex>
             ))}
           </Stack>
         )}

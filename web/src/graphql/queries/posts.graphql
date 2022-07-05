@@ -1,13 +1,5 @@
 query Posts($limit:Float!, $cursor:String, $offset:Float!) {
     posts(limit:$limit, cursor:$cursor, offset:$offset) {
-        _id
-        createdAt
-        updatedAt
-        title
-        textSnippet
-        point
-        creator {
-            ...RegularUser
-        }
+        ...PostSnippet
     }
 }

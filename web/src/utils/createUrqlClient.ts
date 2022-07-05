@@ -52,7 +52,6 @@ const cursorPagination = (cursor?: string): Resolver => {
       const data = cache.resolve(entityKey, element.fieldKey) as string[];
       results.push(...data);
     });
-    console.log("??????????????");
     return results;
   };
 };
@@ -94,6 +93,12 @@ export const createUrqlClient = (ssrExchange: any) => ({
           createPost: (_result, args, cache, info) => {
             const key = "Query";
             const fieldName = "posts";
+
+            // const allFields = cache.inspectFields(key);
+            // const nameFields = allFields.filter(e => e.fieldName === fieldName);
+            // nameFields.forEach(e => {
+            //   cache.invalidate(key, fieldName, e.arguments);
+            // });
             cache.invalidate(key, fieldName, {limit:10});
           },
           logout: (_result, args, cache, info) => {

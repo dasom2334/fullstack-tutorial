@@ -5,11 +5,13 @@ import {
   FieldResolver,
   InputType,
   Int,
-  Mutation, Query,
+  Mutation,
+  Query,
   Resolver,
   Root,
   UseMiddleware
 } from "type-graphql";
+import { QueryBuilder } from "typeorm";
 import { Post } from "../entities/Post";
 import { Updoot } from "../entities/Updoot";
 import { isAuth } from "../middleware/isAuth";
@@ -24,7 +26,6 @@ class PostInput {
   @Field()
   text!: string;
 }
-
 
 @Resolver(Post)
 export class PostResolver {
@@ -43,26 +44,50 @@ export class PostResolver {
     const realValue = isUpdoot ? 1 : -1;
     const { userId } = req.session;
     // const { userId } = { userId: 1 };
+
+    const updoot = await Updoot.findOne({
+      where: { post_id, user_id: userId },
+    });
+
     let isSafe = true;
-    await AppDataSource.createQueryBuilder()
-      .insert()
-      .into(Updoot)
-      .values([{ user_id: userId, post_id, value }])
-      .execute()
-      .catch((err) => {
-        console.log(err);
-        isSafe = false;
-      });
+
+    let qb = AppDataSource.createQueryBuilder() as QueryBuilder<Updoot>;
+    console.log(userId, updoot, updoot?.value, realValue, !updoot);
+    if (updoot && updoot.value !== undefined) {
+      if (updoot.value == realValue) {
+        return false;
+      }
+      qb = qb
+        .update(Updoot)
+        .set({ value: realValue })
+        .where("Updoot.user_id = :userId AND Updoot.post_id = :post_id", {
+          userId,
+          post_id,
+        });
+    } else if (!updoot) {
+      qb = qb
+        .insert()
+        .into(Updoot, ["user_id", "post_id", "value"])
+        .values([{ user_id: userId, post_id, value: realValue }]);
+    }
+    await qb.execute().catch((err) => {
+      console.log(err);
+      isSafe = false;
+    });
     if (isSafe) {
+      let addPoint = realValue;
+      if (updoot) {
+        addPoint = addPoint == 1 ? 2 : -2;
+      }
       await AppDataSource.createQueryBuilder()
         .update(Post)
-        .set({ point: () => `point + ${realValue}` })
+        .set({ point: () => `point + ${addPoint}` })
         .where("Post._id = :post_id", { post_id })
         .execute()
         .catch((err) => {
           console.log(err);
           isSafe = false;
-      });
+        });
     }
     return isSafe;
   }
@@ -91,7 +116,7 @@ export class PostResolver {
         cursor: cursor ? new Date(cursor) : null,
       });
     }
-    console.log(await result.getRawMany());
+    // console.log(await result.getRawMany());
     return result.getMany();
   }
   @Query(() => Post, { nullable: true })
