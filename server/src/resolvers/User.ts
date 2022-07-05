@@ -2,8 +2,13 @@ import argon2 from "argon2";
 import {
   Arg,
   Ctx,
-  Field, Mutation, ObjectType,
-  Query, Resolver
+  Field,
+  FieldResolver,
+  Mutation,
+  ObjectType,
+  Query,
+  Resolver,
+  Root,
 } from "type-graphql";
 import { User } from "../entities/User";
 import { MyContext } from "../types";
@@ -14,12 +19,12 @@ import { sendEmail } from "../utils/sendEmail";
 import {
   COOKIE_NAME,
   FORGET_PASSWORD_PREFIX,
-  TIME_ONE_DAY
+  TIME_ONE_DAY,
 } from "../constants";
 import {
   errorGenerater,
   validateChangePassword,
-  validateRegister
+  validateRegister,
 } from "../utils/validateUser";
 import { UsernamePasswordInput } from "./UsernamePasswordInput";
 
@@ -44,8 +49,17 @@ class UserResponse {
   user?: User;
 }
 
-@Resolver()
+@Resolver(User)
 export class UserResolver {
+  
+  @FieldResolver(() => String)
+  email(@Root() user: User, @Ctx() { req }: MyContext) {
+    if (req.session.userId == user._id) {
+      return user.email;
+    }
+    return "";
+  }
+
   @Mutation(() => UserResponse)
   async changePassword(
     @Arg("token") token: string,
@@ -146,16 +160,16 @@ export class UserResolver {
 
       user = result.raw[0];
       // await em.persistAndFlush(user);
-    } catch (err : any) {
+    } catch (err: any) {
       console.log(err);
       const detail = err.detail;
-      
-      let field = 'undefined';
+
+      let field = "undefined";
       let message = "Unhandled Error";
-      if (err.code == '23505') {
-        if (detail.includes('username')) field = 'username';
-        if (detail.includes('email')) field = 'email';
-        message = 'Aleady Taken.';
+      if (err.code == "23505") {
+        if (detail.includes("username")) field = "username";
+        if (detail.includes("email")) field = "email";
+        message = "Aleady Taken.";
       }
       // const field = constraint[1];
       // let message = "Unhandled Error";

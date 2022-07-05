@@ -1,10 +1,19 @@
-import { ObjectType, Field } from 'type-graphql';
-import { BaseEntity, Column, CreateDateColumn, Entity, OneToMany, PrimaryGeneratedColumn, UpdateDateColumn } from 'typeorm';
-import { Post } from './Post';
+import { ObjectType, Field } from "type-graphql";
+import {
+  BaseEntity,
+  Column,
+  CreateDateColumn,
+  Entity,
+  OneToMany,
+  PrimaryGeneratedColumn,
+  UpdateDateColumn,
+} from "typeorm";
+import { Post } from "./Post";
+import { Updoot } from "./Updoot";
 
 @ObjectType()
 @Entity()
-export class User extends BaseEntity{
+export class User extends BaseEntity {
   @Field()
   @PrimaryGeneratedColumn()
   _id!: number;
@@ -20,16 +29,21 @@ export class User extends BaseEntity{
   @Field()
   @Column({ unique: true })
   username!: string;
-  
+
   @Field()
   @Column({ unique: true })
   email!: string;
 
   @Column()
   password!: string;
-  
+
   // @Field()
   // @Column('jsonb', {nullable: true})
-  @OneToMany(() => Post, post => post.creator)
+  // @Field()
+  @OneToMany(() => Post, (post) => post.creator)
   posts?: Post[];
+
+  // @Field()
+  @OneToMany(() => Updoot, (updoot) => updoot.user)
+  updoots?: Updoot[];
 }

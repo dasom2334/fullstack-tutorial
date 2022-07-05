@@ -3,7 +3,7 @@
 Fullstack React GraphQL TypeScript Tutorial
 https://www.youtube.com/watch?v=I6ypD7qv3Z8
 
-current 6:50:02
+current 8:46:46
 
 0:00:00 ~~Intro~~<br>
 0:02:02 ~~Node/TypeScript Setup~~<br>
@@ -30,14 +30,14 @@ current 6:50:02
 6:02:26 ~~Global Error Handling~~<br>
 6:24:15 ~~Next.js Query Params~~<br>
 6:31:26 ~~URQL Pagination Start~~<br>
-6:50:02 Adding Mock Data<br>
-7:01:19 Chakra Styling<br>
-7:12:37 More URQL Pagination<br>
-7:32:07 Fix Mock Data<br>
-7:40:41 URQL Pagination Has More<br>
-8:00:53 GraphQL Fetching Relationships<br>
-8:18:43 GraphQL Field Permissions<br>
-8:23:16 Many to Many<br>
+6:50:02 ~~Adding Mock Data~~<br>
+7:01:19 ~~Chakra Styling~~<br>
+7:12:37 ~~More URQL Pagination~~<br>
+7:32:07 ~~Fix Mock Data~~<br>
+7:40:41 ~~URQL Pagination Has More~~<br>
+8:00:53 ~~GraphQL Fetching Relationships~~<br>
+8:18:43 ~~GraphQL Field Permissions~~<br>
+8:23:16 ~~Many to Many~~<br>
 8:46:46 Invalidate Queries<br>
 9:00:49 Upvote UI<br>
 9:23:11 Change Vote<br>
