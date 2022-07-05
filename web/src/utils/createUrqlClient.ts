@@ -43,18 +43,16 @@ const cursorPagination = (cursor?: string): Resolver => {
     if (size === 0) {
       return undefined;
     }
+
     const fieldKey = `${fieldName}(${stringifyVariables(fieldArgs)})`;
     const isItInTheCache = cache.resolve(entityKey, fieldKey);
     info.partial = !isItInTheCache;
     const results: string[] = [];
     fieldInfos.forEach((element) => {
-      const data = cache.resolve(
-        entityKey,
-        element.fieldKey
-      ) as string[];
+      const data = cache.resolve(entityKey, element.fieldKey) as string[];
       results.push(...data);
     });
-
+    console.log("??????????????");
     return results;
   };
 };
@@ -83,6 +81,9 @@ export const createUrqlClient = (ssrExchange: any) => ({
   exchanges: [
     dedupExchange,
     cacheExchange({
+      keys: {
+        PaginatedPosts: () => null,
+      },
       resolvers: {
         Query: {
           posts: cursorPagination(),
@@ -90,6 +91,11 @@ export const createUrqlClient = (ssrExchange: any) => ({
       },
       updates: {
         Mutation: {
+          createPost: (_result, args, cache, info) => {
+            const key = "Query";
+            const fieldName = "posts";
+            cache.invalidate(key, fieldName, {limit:10});
+          },
           logout: (_result, args, cache, info) => {
             beeterUpdateQuery<LogoutMutation, MeQuery>(
               cache,

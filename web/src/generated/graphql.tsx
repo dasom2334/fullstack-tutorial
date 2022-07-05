@@ -32,6 +32,7 @@ export type Mutation = {
   login: UserResponse;
   logout: Scalars['Boolean'];
   register: UserResponse;
+  vote: Scalars['Boolean'];
 };
 
 
@@ -66,12 +67,18 @@ export type MutationRegisterArgs = {
   options: UsernamePasswordInput;
 };
 
+
+export type MutationVoteArgs = {
+  post_id: Scalars['Int'];
+  value: Scalars['Int'];
+};
+
 export type Post = {
   __typename?: 'Post';
   _id: Scalars['Float'];
   createdAt: Scalars['DateTime'];
   creator: User;
-  creatorId: Scalars['Float'];
+  creator_id: Scalars['Float'];
   point: Scalars['Float'];
   text: Scalars['String'];
   textSnippet: Scalars['String'];
@@ -152,7 +159,7 @@ export type CreatePostMutationVariables = Exact<{
 }>;
 
 
-export type CreatePostMutation = { __typename?: 'Mutation', createPost: { __typename?: 'Post', _id: number, createdAt: any, updatedAt: any, title: string, text: string, point: number, creatorId: number } };
+export type CreatePostMutation = { __typename?: 'Mutation', createPost: { __typename?: 'Post', _id: number, createdAt: any, updatedAt: any, title: string, text: string, point: number, creator_id: number } };
 
 export type ForgotPasswordMutationVariables = Exact<{
   email: Scalars['String'];
@@ -239,7 +246,7 @@ export const CreatePostDocument = gql`
     title
     text
     point
-    creatorId
+    creator_id
   }
 }
     `;

@@ -6,6 +6,6 @@ mutation CreatePost($input:PostInput!) {
         title
         text
         point
-        creatorId
+        creator_id
     }
 }

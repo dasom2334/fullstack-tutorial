@@ -1,5 +1,3 @@
-import { isAuth } from "../middleware/isAuth";
-import { MyContext } from "../types";
 import {
   Arg,
   Ctx,
@@ -7,17 +5,16 @@ import {
   FieldResolver,
   InputType,
   Int,
-  Mutation,
-  ObjectType,
-  Query,
+  Mutation, Query,
   Resolver,
   Root,
-  UseMiddleware,
+  UseMiddleware
 } from "type-graphql";
 import { Post } from "../entities/Post";
-import AppDataSource from "../typeormAppDataSource";
 import { Updoot } from "../entities/Updoot";
-// import { User } from "../entities/User";
+import { isAuth } from "../middleware/isAuth";
+import AppDataSource from "../typeormAppDataSource";
+import { MyContext } from "../types";
 
 @InputType()
 class PostInput {
