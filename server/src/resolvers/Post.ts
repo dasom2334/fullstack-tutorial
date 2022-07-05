@@ -15,6 +15,7 @@ import {
 } from "type-graphql";
 import { Post } from "../entities/Post";
 import AppDataSource from "../typeormAppDataSource";
+// import { User } from "../entities/User";
 
 @InputType()
 class PostInput {
@@ -40,17 +41,18 @@ export class PostResolver {
     const realLimit = Math.min(50, limit);
     const result = AppDataSource.getRepository(Post)
       .createQueryBuilder("Post")
+      .leftJoinAndSelect('Post.creator', 'Creator', `Creator._id = Post.creator_id`)
       .orderBy("Post.createdAt", "DESC")
       .addOrderBy("Post._id", "DESC")
       .offset(offset)
       .limit(realLimit);
       // .take(realLimit);
-
     if (cursor) {
       result.where("Post.createdAt > :cursor", {
         cursor: cursor ? new Date(cursor) : null,
       });
     }
+    console.log(await result.getRawMany());
     return result.getMany();
   }
   @Query(() => Post, { nullable: true })
@@ -63,7 +65,7 @@ export class PostResolver {
     @Arg("input") input: PostInput,
     @Ctx() { req }: MyContext
   ): Promise<Post | null> {
-    return Post.create({ ...input, creatorId: req.session.userId }).save();
+    return Post.create({ ...input, creator_id: req.session.userId }).save();
   }
   @Query(() => Post)
   @UseMiddleware(isAuth)
@@ -78,7 +80,7 @@ export class PostResolver {
       return null;
     }
 
-    if (post.creatorId !== req.session.userId) {
+    if (post.creator_id !== req.session.userId) {
       return null;
     }
     Post.update({ _id }, { ...input });
