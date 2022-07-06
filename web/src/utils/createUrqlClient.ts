@@ -13,6 +13,9 @@ import { beeterUpdateQuery } from "./beeterUpdateQuery";
 import router from "next/router";
 import { Exchange } from "urql";
 import { pipe, tap } from "wonka";
+import { SSRExchange } from "next-urql";
+import { isServer } from "./isServer";
+
 
 const cursorPagination = (cursor?: string): Resolver => {
   // const date = cursor? new Date(cursor):null;
@@ -66,7 +69,7 @@ export const errorExchange: Exchange =
     );
   };
 
-export const createUrqlClient = (ssrExchange: any) => ({
+export const createUrqlClient = (ssrExchange: SSRExchange) => ({
   url: "http://localhost:4000/graphql",
   fetchOptions: {
     credentials: "include" as const,

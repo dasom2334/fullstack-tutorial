@@ -8,15 +8,17 @@ interface NavBarProps {}
 
 export const NavBar: React.FC<NavBarProps> = ({}) => {
   const [{ fetching: logoutFetching }, logout] = useLogoutMutation();
-  const [{ data, fetching }] = useMeQuery({
-    // pause: isServer(),
+  const [{ data, fetching, error }] = useMeQuery({
+    pause: isServer,
   });
+  console.log(typeof window, data, fetching, error);
 
   let body = null;
-  if (fetching) {
+  if (fetching || isServer) {
+    body = (<Flex>Check Loged in...</Flex>)
   } else if (!data?.me) {
     body = (
-      <>
+      <Flex>
         <NextLink href="/login">
           <Link mr={2} textColor="white">
             Login
@@ -25,7 +27,7 @@ export const NavBar: React.FC<NavBarProps> = ({}) => {
         <NextLink href="/register">
           <Link textColor="white">Register</Link>
         </NextLink>
-      </>
+      </Flex>
     );
   } else {
     body = (
@@ -44,7 +46,14 @@ export const NavBar: React.FC<NavBarProps> = ({}) => {
     );
   }
   return (
-    <Flex bgColor="tan" p={4} ml={"auto"} position="sticky" top={0} zIndex={100}>
+    <Flex
+      bgColor="tan"
+      p={4}
+      ml={"auto"}
+      position="sticky"
+      top={0}
+      zIndex={100}
+    >
       <Box ml={"auto"}>{body}</Box>
     </Flex>
   );
