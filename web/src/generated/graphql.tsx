@@ -84,7 +84,7 @@ export type Post = {
   textSnippet: Scalars['String'];
   title: Scalars['String'];
   updatedAt: Scalars['DateTime'];
-  updoots: Array<Updoot>;
+  updoots?: Maybe<Array<Updoot>>;
 };
 
 export type PostInput = {
@@ -137,7 +137,7 @@ export type User = {
   email: Scalars['String'];
   posts: Array<Post>;
   updatedAt: Scalars['DateTime'];
-  updoots: Array<Updoot>;
+  updoots?: Maybe<Array<Updoot>>;
   username: Scalars['String'];
 };
 
@@ -153,7 +153,7 @@ export type UsernamePasswordInput = {
   username: Scalars['String'];
 };
 
-export type PostSnippetFragment = { __typename?: 'Post', _id: number, createdAt: any, updatedAt: any, title: string, textSnippet: string, point: number, creator: { __typename?: 'User', _id: number, username: string, email: string }, updoots: Array<{ __typename?: 'Updoot', _id: number, value: number, user?: { __typename?: 'User', _id: number, username: string, email: string } | null }> };
+export type PostSnippetFragment = { __typename?: 'Post', _id: number, createdAt: any, updatedAt: any, title: string, text: string, textSnippet: string, point: number, creator: { __typename?: 'User', _id: number, username: string, email: string }, updoots?: Array<{ __typename?: 'Updoot', _id: number, value: number, user?: { __typename?: 'User', _id: number, username: string, email: string } | null }> | null };
 
 export type RegularErrorFragment = { __typename?: 'FieldError', field: string, message: string };
 
@@ -216,6 +216,13 @@ export type MeQueryVariables = Exact<{ [key: string]: never; }>;
 
 export type MeQuery = { __typename?: 'Query', me?: { __typename?: 'User', _id: number, username: string, email: string } | null };
 
+export type PostQueryVariables = Exact<{
+  id: Scalars['Int'];
+}>;
+
+
+export type PostQuery = { __typename?: 'Query', post?: { __typename?: 'Post', _id: number, createdAt: any, updatedAt: any, title: string, text: string, textSnippet: string, point: number, creator: { __typename?: 'User', _id: number, username: string, email: string }, updoots?: Array<{ __typename?: 'Updoot', _id: number, value: number, user?: { __typename?: 'User', _id: number, username: string, email: string } | null }> | null } | null };
+
 export type PostsQueryVariables = Exact<{
   limit: Scalars['Float'];
   cursor?: InputMaybe<Scalars['String']>;
@@ -223,7 +230,7 @@ export type PostsQueryVariables = Exact<{
 }>;
 
 
-export type PostsQuery = { __typename?: 'Query', posts: Array<{ __typename?: 'Post', _id: number, createdAt: any, updatedAt: any, title: string, textSnippet: string, point: number, updoots: Array<{ __typename?: 'Updoot', user_id: number, post_id: number, _id: number, value: number, user?: { __typename?: 'User', _id: number, username: string, email: string } | null }>, creator: { __typename?: 'User', _id: number, username: string, email: string } }> };
+export type PostsQuery = { __typename?: 'Query', posts: Array<{ __typename?: 'Post', _id: number, createdAt: any, updatedAt: any, title: string, text: string, textSnippet: string, point: number, updoots?: Array<{ __typename?: 'Updoot', user_id: number, post_id: number, _id: number, value: number, user?: { __typename?: 'User', _id: number, username: string, email: string } | null }> | null, creator: { __typename?: 'User', _id: number, username: string, email: string } }> };
 
 export const RegularUserFragmentDoc = gql`
     fragment RegularUser on User {
@@ -238,6 +245,7 @@ export const PostSnippetFragmentDoc = gql`
   createdAt
   updatedAt
   title
+  text
   textSnippet
   point
   creator {
@@ -356,6 +364,17 @@ export const MeDocument = gql`
 
 export function useMeQuery(options?: Omit<Urql.UseQueryArgs<MeQueryVariables>, 'query'>) {
   return Urql.useQuery<MeQuery>({ query: MeDocument, ...options });
+};
+export const PostDocument = gql`
+    query Post($id: Int!) {
+  post(identifier: $id) {
+    ...PostSnippet
+  }
+}
+    ${PostSnippetFragmentDoc}`;
+
+export function usePostQuery(options: Omit<Urql.UseQueryArgs<PostQueryVariables>, 'query'>) {
+  return Urql.useQuery<PostQuery>({ query: PostDocument, ...options });
 };
 export const PostsDocument = gql`
     query Posts($limit: Float!, $cursor: String, $offset: Float!) {

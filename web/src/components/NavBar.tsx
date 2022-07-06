@@ -1,32 +1,41 @@
-import { Box, Button, Flex, Link } from "@chakra-ui/react";
-import React from "react";
+import { Box, Button, Flex, Heading, Link } from "@chakra-ui/react";
 import NextLink from "next/link";
+import React from "react";
 import { useLogoutMutation, useMeQuery } from "../generated/graphql";
-import { isServer } from "../utils/isServer";
 
 interface NavBarProps {}
 
 export const NavBar: React.FC<NavBarProps> = ({}) => {
   const [{ fetching: logoutFetching }, logout] = useLogoutMutation();
   const [{ data, fetching, error }] = useMeQuery({
-    pause: isServer,
+    // pause: isServer,
   });
   console.log(typeof window, data, fetching, error);
 
   let body = null;
-  if (fetching || isServer) {
-    body = (<Flex>Check Loged in...</Flex>)
+  if (fetching) {
+    body = <Flex>Check Loged in...</Flex>;
   } else if (!data?.me) {
     body = (
-      <Flex>
-        <NextLink href="/login">
-          <Link mr={2} textColor="white">
-            Login
-          </Link>
-        </NextLink>
-        <NextLink href="/register">
-          <Link textColor="white">Register</Link>
-        </NextLink>
+      <Flex w="100%">
+        <Box my={"auto"}>
+          <NextLink href="/">
+            <Link textColor="white">
+              <Heading mr="auto">LiReddit</Heading>
+            </Link>
+          </NextLink>
+        </Box>
+
+        <Box ml={"auto"} my={"auto"}>
+          <NextLink href="/login">
+            <Link mr={2} textColor="white">
+              Login
+            </Link>
+          </NextLink>
+          <NextLink href="/register">
+            <Link textColor="white">Register</Link>
+          </NextLink>
+        </Box>
       </Flex>
     );
   } else {
@@ -54,7 +63,7 @@ export const NavBar: React.FC<NavBarProps> = ({}) => {
       top={0}
       zIndex={100}
     >
-      <Box ml={"auto"}>{body}</Box>
+      {body}
     </Flex>
   );
 };

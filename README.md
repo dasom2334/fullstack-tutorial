@@ -3,7 +3,7 @@
 Fullstack React GraphQL TypeScript Tutorial
 https://www.youtube.com/watch?v=I6ypD7qv3Z8
 
-current 9:51:57
+current 10:21:55
 
 0:00:00 ~~Intro~~<br>
 0:02:02 ~~Node/TypeScript Setup~~<br>
@@ -43,8 +43,8 @@ current 9:51:57
 9:23:11 ~~Change Vote~~<br>
 9:31:57 ~~Write Fragments~~<br>
 9:39:00 ~~Vote Status~~<br>
-9:51:57 SSR Cookie Forwarding<br>
-10:04:08 Single Post<br>
+9:51:57 ~~SSR Cookie Forwarding~~<br>
+10:04:08 ~~Single Post~~<br>
 10:21:55 Delete Post<br>
 10:38:19 Edit Post<br>
 11:09:23 DataLoader<br>

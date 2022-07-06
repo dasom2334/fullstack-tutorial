@@ -132,7 +132,14 @@ export class PostResolver {
   }
   @Query(() => Post, { nullable: true })
   post(@Arg("identifier", () => Int) _id: number): Promise<Post | null> {
-    return Post.findOneBy({ _id });
+    return AppDataSource.getRepository(Post)
+    .createQueryBuilder("Post")
+    .leftJoinAndSelect(
+      "Post.creator",
+      "Creator",
+      `Creator._id = Post.creator_id`
+    )
+    .where("Post._id = :_id", { _id }).getOne();
   }
   @Mutation(() => Post)
   @UseMiddleware(isAuth)

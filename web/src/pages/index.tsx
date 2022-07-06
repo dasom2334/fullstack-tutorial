@@ -27,12 +27,11 @@ const Index = () => {
   });
   const [{ data, fetching, error }] = usePostsQuery({
     variables,
-    pause: isServer,
+    // pause: isServer,
   });
-  console.log(typeof window, data, fetching, error);
-  // if (!fetching && !data) {
-  //   return <div>You Got Query Failed For Some Reason.</div>;
-  // }
+  if (!fetching && !data) {
+    return <div>You Got Query Failed For Some Reason.</div>;
+  }
   console.log(error);
   return (
     <Layout>
@@ -43,9 +42,7 @@ const Index = () => {
             <Link ml="auto">create post</Link>
           </NextLink>
         </Flex>
-        {fetching || isServer ? (
-          <Box>loading...</Box>
-        ) : !data?.posts ? (
+        {!data?.posts ? (
           <Box>loading...</Box>
         ) : (
           <Box>
@@ -54,7 +51,9 @@ const Index = () => {
                 <Flex key={p._id} p={5} shadow="md" borderWidth={1}>
                   <UpdootSection post={p} />
                   <Box ml={2}>
-                    <Heading fontSize="xl">{p.title}</Heading>
+                    <Heading fontSize="xl">
+                      <NextLink href={`/post/${p._id}`}>{p.title}</NextLink>
+                    </Heading>
                     <Text>posted by {p.creator.username}</Text>
                     <Text mt={4}>{p.textSnippet}</Text>
                   </Box>

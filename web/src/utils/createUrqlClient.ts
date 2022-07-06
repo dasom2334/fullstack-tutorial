@@ -1,5 +1,11 @@
 import { Cache, cacheExchange, Resolver } from "@urql/exchange-graphcache";
-import { dedupExchange, fetchExchange, gql, stringifyVariables } from "urql";
+import {
+  ClientOptions,
+  dedupExchange,
+  fetchExchange,
+  gql,
+  stringifyVariables,
+} from "urql";
 import {
   LoginMutation,
   LogoutMutation,
@@ -13,8 +19,9 @@ import { beeterUpdateQuery } from "./beeterUpdateQuery";
 import router from "next/router";
 import { Exchange } from "urql";
 import { pipe, tap } from "wonka";
-import { SSRExchange } from "next-urql";
+import { NextUrqlClientConfig, SSRExchange } from "next-urql";
 import { isServer } from "./isServer";
+import { NextPageContext } from "next";
 
 const cursorPagination = (cursor?: string): Resolver => {
   // const date = cursor? new Date(cursor):null;
@@ -67,116 +74,129 @@ export const errorExchange: Exchange =
       })
     );
   };
-
-export const createUrqlClient = (ssrExchange: SSRExchange) => ({
-  url: "http://localhost:4000/graphql",
-  fetchOptions: {
-    credentials: "include" as const,
-  },
-  exchanges: [
-    dedupExchange,
-    cacheExchange({
-      keys: {
-        PaginatedPosts: () => null,
-      },
-      resolvers: {
-        Query: {
-          posts: cursorPagination(),
+export const createUrqlClient = (
+  ssrExchange: SSRExchange,
+  ctx?: NextPageContext
+): ClientOptions => {
+  let cookie = undefined;
+  if (ctx) {
+    cookie = ctx.req?.headers.cookie;
+  }
+  return {
+    url: "http://localhost:4000/graphql",
+    fetchOptions: {
+      credentials: "include" as const,
+      headers: cookie
+        ? {
+            cookie,
+          }
+        : undefined,
+    },
+    exchanges: [
+      dedupExchange,
+      cacheExchange({
+        keys: {
+          PaginatedPosts: () => null,
         },
-      },
-      updates: {
-        Subscription: {
-          me: (result, args, cache, info) => {
-            console.log(result);
+        resolvers: {
+          Query: {
+            posts: cursorPagination(),
           },
         },
-        Mutation: {
-          vote: (result, args, cache, info) => {
-            if (result.vote === 0) return;
-            const { post_id, value } = args as VoteMutationVariables;
-            const data = cache.readFragment(
-              gql`
-                fragment _ on Post {
-                  _id
-                  point
-                  updoots {
-                    value
-                  }
-                }
-              `,
-              { _id: post_id }
-            );
-            if (data) {
-              const newPoint = (result.vote as number) + data.point;
-              cache.writeFragment(
+        updates: {
+          Subscription: {
+            me: (result, args, cache, info) => {
+              console.log(result);
+            },
+          },
+          Mutation: {
+            vote: (result, args, cache, info) => {
+              if (result.vote === 0) return;
+              const { post_id, value } = args as VoteMutationVariables;
+              const data = cache.readFragment(
                 gql`
-                  fragment __ on Post {
+                  fragment _ on Post {
+                    _id
                     point
                     updoots {
                       value
                     }
                   }
                 `,
-                {
-                  _id: post_id,
-                  point: newPoint,
-                  updoots: [{ value: (result.vote as number) > 0 ? 1 : -1 }],
+                { _id: post_id }
+              );
+              if (data) {
+                const newPoint = (result.vote as number) + data.point;
+                cache.writeFragment(
+                  gql`
+                    fragment __ on Post {
+                      point
+                      updoots {
+                        value
+                      }
+                    }
+                  `,
+                  {
+                    _id: post_id,
+                    point: newPoint,
+                    updoots: [{ value: (result.vote as number) > 0 ? 1 : -1 }],
+                  }
+                );
+              }
+            },
+            createPost: (_result, args, cache, info) => {
+              invalidateAllArgFields("Query", "posts", cache);
+            },
+            logout: (_result, args, cache, info) => {
+              beeterUpdateQuery<LogoutMutation, MeQuery>(
+                cache,
+                { query: MeDocument },
+                _result,
+                () => ({ me: null })
+              );
+              invalidateAllArgFields("Query", "posts", cache);
+            },
+            login: (_result, args, cache, info) => {
+              beeterUpdateQuery<LoginMutation, MeQuery>(
+                cache,
+                { query: MeDocument },
+                _result,
+                (result, query) => {
+                  if (result.login.errors) {
+                    return query;
+                  } else {
+                    return {
+                      me: result.login.user,
+                      // me: 5,
+                    };
+                  }
                 }
               );
-            }
-          },
-          createPost: (_result, args, cache, info) => {
-            invalidateAllArgFields("Query", "posts", cache);
-          },
-          logout: (_result, args, cache, info) => {
-            beeterUpdateQuery<LogoutMutation, MeQuery>(
-              cache,
-              { query: MeDocument },
-              _result,
-              () => ({ me: null })
-            );
-            invalidateAllArgFields("Query", "posts", cache);
-          },
-          login: (_result, args, cache, info) => {
-            beeterUpdateQuery<LoginMutation, MeQuery>(
-              cache,
-              { query: MeDocument },
-              _result,
-              (result, query) => {
-                if (result.login.errors) {
-                  return query;
-                } else {
-                  return {
-                    me: result.login.user,
-                    // me: 5,
-                  };
+              invalidateAllArgFields("Query", "posts", cache);
+            },
+            register: (_result, args, cache, info) => {
+              beeterUpdateQuery<RegisterMutation, MeQuery>(
+                cache,
+                { query: MeDocument },
+                _result,
+                (result, query) => {
+                  if (result.register.errors) {
+                    return query;
+                  } else {
+                    return {
+                      me: result.register.user,
+                      // me: 5,
+                    };
+                  }
                 }
-              }
-            );
-            invalidateAllArgFields("Query", "posts", cache);
-          },
-          register: (_result, args, cache, info) => {
-            beeterUpdateQuery<RegisterMutation, MeQuery>(
-              cache,
-              { query: MeDocument },
-              _result,
-              (result, query) => {
-                if (result.register.errors) {
-                  return query;
-                } else {
-                  return {
-                    me: result.register.user,
-                    // me: 5,
-                  };
-                }
-              }
-            );
+              );
+            },
           },
         },
-      },
-    }),
-    errorExchange,
-    ssrExchange,
-    fetchExchange,
-  ],
-});
+      }),
+      errorExchange,
+      ssrExchange,
+      fetchExchange,
+    ],
+  };
+};
