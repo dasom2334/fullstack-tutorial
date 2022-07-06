@@ -17,6 +17,7 @@ import { Layout } from "../components/Layout";
 import { useState } from "react";
 import { ChevronDownIcon, ChevronUpIcon } from "@chakra-ui/icons";
 import { UpdootSection } from "../components/UpdootSection";
+import { isServer } from "../utils/isServer";
 
 const Index = () => {
   const [variables, setVariables] = useState({
@@ -26,10 +27,13 @@ const Index = () => {
   });
   const [{ data, fetching, error }] = usePostsQuery({
     variables,
+    pause: isServer,
   });
-  if (!fetching && !data) {
-    return <div>You Got Query Failed For Some Reason.</div>;
-  }
+  console.log(typeof window, data, fetching, error);
+  // if (!fetching && !data) {
+  //   return <div>You Got Query Failed For Some Reason.</div>;
+  // }
+  console.log(error);
   return (
     <Layout>
       <>
@@ -39,21 +43,25 @@ const Index = () => {
             <Link ml="auto">create post</Link>
           </NextLink>
         </Flex>
-        {!data ? (
+        {fetching || isServer ? (
+          <Box>loading...</Box>
+        ) : !data?.posts ? (
           <Box>loading...</Box>
         ) : (
-          <Stack spacing={8}>
-            {data.posts.map((p) => (
-              <Flex key={p._id} p={5} shadow="md" borderWidth={1}>
-                <UpdootSection post={p} />
-                <Box ml={2}>
-                  <Heading fontSize="xl">{p.title}</Heading>
-                  <Text>posted by {p.creator.username}</Text>
-                  <Text mt={4}>{p.textSnippet}</Text>
-                </Box>
-              </Flex>
-            ))}
-          </Stack>
+          <Box>
+            <Stack spacing={8}>
+              {data?.posts.map((p) => (
+                <Flex key={p._id} p={5} shadow="md" borderWidth={1}>
+                  <UpdootSection post={p} />
+                  <Box ml={2}>
+                    <Heading fontSize="xl">{p.title}</Heading>
+                    <Text>posted by {p.creator.username}</Text>
+                    <Text mt={4}>{p.textSnippet}</Text>
+                  </Box>
+                </Flex>
+              ))}
+            </Stack>
+          </Box>
         )}
         {data ? (
           <Flex mt={8}>
@@ -78,4 +86,4 @@ const Index = () => {
   );
 };
 
-export default withUrqlClient(createUrqlClient, { ssr: true})(Index);
+export default withUrqlClient(createUrqlClient, { ssr: true })(Index);

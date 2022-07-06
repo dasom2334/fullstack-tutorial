@@ -42,8 +42,7 @@ export class PostResolver {
   ) {
     const isUpdoot = value !== -1;
     const realValue = isUpdoot ? 1 : -1;
-    const userId = req.session?.userId ?? 1;
-    console.log(userId);
+    const {userId} = req.session;
     const updoot = await Updoot.findOne({
       where: { post_id, user_id: userId },
     });
@@ -99,7 +98,7 @@ export class PostResolver {
     @Arg("cursor", () => String, { nullable: true }) cursor: string | null,
     @Ctx() { req }: MyContext
   ): Promise<Post[]> {
-    const userId = req.session?.userId ?? 1;
+    const {userId} = req.session;
     const realLimit = Math.min(50, limit);
     let result = AppDataSource.getRepository(Post)
       .createQueryBuilder("Post")

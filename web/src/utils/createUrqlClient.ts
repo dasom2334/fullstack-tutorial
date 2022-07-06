@@ -16,7 +16,6 @@ import { pipe, tap } from "wonka";
 import { SSRExchange } from "next-urql";
 import { isServer } from "./isServer";
 
-
 const cursorPagination = (cursor?: string): Resolver => {
   // const date = cursor? new Date(cursor):null;
   return (_parent, fieldArgs, cache, info) => {
@@ -86,6 +85,11 @@ export const createUrqlClient = (ssrExchange: SSRExchange) => ({
         },
       },
       updates: {
+        Subscription: {
+          me: (result, args, cache, info) => {
+            console.log(result);
+          },
+        },
         Mutation: {
           vote: (result, args, cache, info) => {
             if (result.vote === 0) return;
@@ -102,10 +106,8 @@ export const createUrqlClient = (ssrExchange: SSRExchange) => ({
               `,
               { _id: post_id }
             );
-            console.log(data, result, args);
             if (data) {
               const newPoint = (result.vote as number) + data.point;
-              console.log(newPoint);
               cache.writeFragment(
                 gql`
                   fragment __ on Post {
@@ -121,20 +123,6 @@ export const createUrqlClient = (ssrExchange: SSRExchange) => ({
                   updoots: [{ value: (result.vote as number) > 0 ? 1 : -1 }],
                 }
               );
-
-              const data2 = cache.readFragment(
-                gql`
-                  fragment ___ on Post {
-                    _id
-                    point
-                    upboots {
-                      value
-                    }
-                  }
-                `,
-                { _id: post_id }
-              );
-              console.log(data2);
             }
           },
           createPost: (_result, args, cache, info) => {
@@ -147,6 +135,7 @@ export const createUrqlClient = (ssrExchange: SSRExchange) => ({
               _result,
               () => ({ me: null })
             );
+            invalidateAllArgFields("Query", "posts", cache);
           },
           login: (_result, args, cache, info) => {
             beeterUpdateQuery<LoginMutation, MeQuery>(

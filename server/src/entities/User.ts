@@ -43,7 +43,7 @@ export class User extends BaseEntity {
   @OneToMany(() => Post, (post) => post.creator)
   posts?: Post[];
 
-  @Field(() => [Updoot])
+  @Field(() => [Updoot], { nullable: true })
   @OneToMany(() => Updoot, (updoot) => updoot.user)
   updoots?: Updoot[];
 }
