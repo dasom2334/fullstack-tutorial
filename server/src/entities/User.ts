@@ -39,11 +39,11 @@ export class User extends BaseEntity {
 
   // @Field()
   // @Column('jsonb', {nullable: true})
-  // @Field()
+  @Field(() => [Post])
   @OneToMany(() => Post, (post) => post.creator)
   posts?: Post[];
 
-  // @Field()
+  @Field(() => [Updoot])
   @OneToMany(() => Updoot, (updoot) => updoot.user)
   updoots?: Updoot[];
 }

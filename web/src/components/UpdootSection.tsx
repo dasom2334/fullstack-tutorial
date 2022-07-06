@@ -9,15 +9,15 @@ import {
 } from "../generated/graphql";
 
 interface UpdootSectionProps {
-  post: PostSnippetFragment;
+  post: PostSnippetFragment ;
 }
 
 export const UpdootSection: React.FC<UpdootSectionProps> = ({ post }) => {
   const [loadingState, setloadingState] = useState<
     "updoot-loading" | "downdoot-loading" | "not-loading"
   >();
-  const [{ fetching, operation }, vote] = useVoteMutation();
-  console.log(fetching, operation);
+  const voteValue = post.updoots[0]?.value ?? 0;
+  const [{}, vote] = useVoteMutation();
   return (
     <Flex direction="column" justifyContent="center" alignItems="center">
       <IconButton
@@ -27,6 +27,8 @@ export const UpdootSection: React.FC<UpdootSectionProps> = ({ post }) => {
           await vote({ post_id: post._id, value: 1 });
           setloadingState("not-loading");
         }}
+        bgColor={voteValue == 1? 'palegreen':undefined}
+        disabled={voteValue == 1? true:undefined}
         isLoading={loadingState === "updoot-loading"}
         icon={<ChevronUpIcon fontSize={24} />}
       />
@@ -39,6 +41,8 @@ export const UpdootSection: React.FC<UpdootSectionProps> = ({ post }) => {
           await vote({ post_id: post._id, value: -1 });
           setloadingState("not-loading");
         }}
+        bgColor={voteValue == -1? 'indianred':undefined}
+        disabled={voteValue == -1? true:undefined}
         isLoading={loadingState === "downdoot-loading"}
         icon={<ChevronDownIcon fontSize={24} />}
       />

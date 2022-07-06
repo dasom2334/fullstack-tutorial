@@ -8,4 +8,11 @@ fragment PostSnippet on Post {
     creator {
         ...RegularUser
     }
+    updoots {
+        _id
+        user {
+            ...RegularUser
+        }
+        value
+    }
 }

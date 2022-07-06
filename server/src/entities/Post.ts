@@ -1,4 +1,4 @@
-import { ObjectType, Field } from "type-graphql";
+import { Field, ObjectType } from "type-graphql";
 import {
   BaseEntity,
   Column,
@@ -30,13 +30,13 @@ export class Post extends BaseEntity {
   @Field()
   @Column()
   title!: string;
-  
+
   @Field()
   @Column()
   text!: string;
 
   @Field()
-  @Column({default: 0})
+  @Column({ default: 0 })
   point!: number;
 
   @Field()
@@ -44,10 +44,14 @@ export class Post extends BaseEntity {
   creator_id!: number;
 
   @Field()
-  @ManyToOne(() => User, user => user.posts)
+  @ManyToOne(() => User, (user) => user.posts)
   creator?: User;
-  
-  // @Field()
-  @OneToMany(() => Updoot, updoot => updoot.post)
+
+  @Field(() => [Updoot])
+  @OneToMany(() => Updoot, (updoot) => updoot.post)
   updoots?: Updoot[];
+
+  // @Field()
+  // @OneToOne(() =>> Updoot, updoot => updoot.post)
+  // updoot?: Updoot;
 }

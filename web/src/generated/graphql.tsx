@@ -32,7 +32,7 @@ export type Mutation = {
   login: UserResponse;
   logout: Scalars['Boolean'];
   register: UserResponse;
-  vote: Scalars['Boolean'];
+  vote: Scalars['Int'];
 };
 
 
@@ -84,6 +84,7 @@ export type Post = {
   textSnippet: Scalars['String'];
   title: Scalars['String'];
   updatedAt: Scalars['DateTime'];
+  updoots: Array<Updoot>;
 };
 
 export type PostInput = {
@@ -119,12 +120,24 @@ export type QueryUpdatePostArgs = {
   input: PostInput;
 };
 
+export type Updoot = {
+  __typename?: 'Updoot';
+  _id: Scalars['Float'];
+  post?: Maybe<Post>;
+  post_id: Scalars['Float'];
+  user?: Maybe<User>;
+  user_id: Scalars['Float'];
+  value: Scalars['Float'];
+};
+
 export type User = {
   __typename?: 'User';
   _id: Scalars['Float'];
   createdAt: Scalars['DateTime'];
   email: Scalars['String'];
+  posts: Array<Post>;
   updatedAt: Scalars['DateTime'];
+  updoots: Array<Updoot>;
   username: Scalars['String'];
 };
 
@@ -140,7 +153,7 @@ export type UsernamePasswordInput = {
   username: Scalars['String'];
 };
 
-export type PostSnippetFragment = { __typename?: 'Post', _id: number, createdAt: any, updatedAt: any, title: string, textSnippet: string, point: number, creator: { __typename?: 'User', _id: number, username: string, email: string } };
+export type PostSnippetFragment = { __typename?: 'Post', _id: number, createdAt: any, updatedAt: any, title: string, textSnippet: string, point: number, creator: { __typename?: 'User', _id: number, username: string, email: string }, updoots: Array<{ __typename?: 'Updoot', _id: number, value: number, user?: { __typename?: 'User', _id: number, username: string, email: string } | null }> };
 
 export type RegularErrorFragment = { __typename?: 'FieldError', field: string, message: string };
 
@@ -196,7 +209,7 @@ export type VoteMutationVariables = Exact<{
 }>;
 
 
-export type VoteMutation = { __typename?: 'Mutation', vote: boolean };
+export type VoteMutation = { __typename?: 'Mutation', vote: number };
 
 export type MeQueryVariables = Exact<{ [key: string]: never; }>;
 
@@ -210,7 +223,7 @@ export type PostsQueryVariables = Exact<{
 }>;
 
 
-export type PostsQuery = { __typename?: 'Query', posts: Array<{ __typename?: 'Post', _id: number, createdAt: any, updatedAt: any, title: string, textSnippet: string, point: number, creator: { __typename?: 'User', _id: number, username: string, email: string } }> };
+export type PostsQuery = { __typename?: 'Query', posts: Array<{ __typename?: 'Post', _id: number, createdAt: any, updatedAt: any, title: string, textSnippet: string, point: number, updoots: Array<{ __typename?: 'Updoot', user_id: number, post_id: number, _id: number, value: number, user?: { __typename?: 'User', _id: number, username: string, email: string } | null }>, creator: { __typename?: 'User', _id: number, username: string, email: string } }> };
 
 export const RegularUserFragmentDoc = gql`
     fragment RegularUser on User {
@@ -229,6 +242,13 @@ export const PostSnippetFragmentDoc = gql`
   point
   creator {
     ...RegularUser
+  }
+  updoots {
+    _id
+    user {
+      ...RegularUser
+    }
+    value
   }
 }
     ${RegularUserFragmentDoc}`;
@@ -341,6 +361,10 @@ export const PostsDocument = gql`
     query Posts($limit: Float!, $cursor: String, $offset: Float!) {
   posts(limit: $limit, cursor: $cursor, offset: $offset) {
     ...PostSnippet
+    updoots {
+      user_id
+      post_id
+    }
   }
 }
     ${PostSnippetFragmentDoc}`;

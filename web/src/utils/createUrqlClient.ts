@@ -1,36 +1,18 @@
-import {
-  createClient,
-  Provider,
-  dedupExchange,
-  fetchExchange,
-  Query,
-  stringifyVariables,
-} from "urql";
-import { cacheExchange, Resolver } from "@urql/exchange-graphcache";
+import { Cache, cacheExchange, Resolver } from "@urql/exchange-graphcache";
+import { dedupExchange, fetchExchange, gql, stringifyVariables } from "urql";
 import {
   LoginMutation,
   LogoutMutation,
   MeDocument,
   MeQuery,
   RegisterMutation,
+  VoteMutationVariables,
 } from "../generated/graphql";
-import { withUrqlClient } from "next-urql";
 import { beeterUpdateQuery } from "./beeterUpdateQuery";
 
-import { filter, pipe, tap } from "wonka";
-import { Exchange } from "urql";
 import router from "next/router";
-
-// import { stringifyVariables } from '@urql/core';
-// import { Resolver, Variables, NullArray } from '../types';
-
-// type MergeMode = 'before' | 'after';
-
-// interface PaginationParams {
-//   offsetArgument?: string;
-//   limitArgument?: string;
-//   mergeMode?: MergeMode;
-// }
+import { Exchange } from "urql";
+import { pipe, tap } from "wonka";
 
 const cursorPagination = (cursor?: string): Resolver => {
   // const date = cursor? new Date(cursor):null;
@@ -54,6 +36,18 @@ const cursorPagination = (cursor?: string): Resolver => {
     });
     return results;
   };
+};
+
+const invalidateAllArgFields = (
+  key: string,
+  fieldName: string,
+  cache: Cache
+) => {
+  const allFields = cache.inspectFields(key);
+  const nameFields = allFields.filter((e) => e.fieldName === fieldName);
+  nameFields.forEach((e) => {
+    cache.invalidate(key, fieldName, e.arguments);
+  });
 };
 
 export const errorExchange: Exchange =
@@ -90,16 +84,58 @@ export const createUrqlClient = (ssrExchange: any) => ({
       },
       updates: {
         Mutation: {
-          createPost: (_result, args, cache, info) => {
-            const key = "Query";
-            const fieldName = "posts";
+          vote: (result, args, cache, info) => {
+            if (result.vote === 0) return;
+            const { post_id, value } = args as VoteMutationVariables;
+            const data = cache.readFragment(
+              gql`
+                fragment _ on Post {
+                  _id
+                  point
+                  updoots {
+                    value
+                  }
+                }
+              `,
+              { _id: post_id }
+            );
+            console.log(data, result, args);
+            if (data) {
+              const newPoint = (result.vote as number) + data.point;
+              console.log(newPoint);
+              cache.writeFragment(
+                gql`
+                  fragment __ on Post {
+                    point
+                    updoots {
+                      value
+                    }
+                  }
+                `,
+                {
+                  _id: post_id,
+                  point: newPoint,
+                  updoots: [{ value: (result.vote as number) > 0 ? 1 : -1 }],
+                }
+              );
 
-            // const allFields = cache.inspectFields(key);
-            // const nameFields = allFields.filter(e => e.fieldName === fieldName);
-            // nameFields.forEach(e => {
-            //   cache.invalidate(key, fieldName, e.arguments);
-            // });
-            cache.invalidate(key, fieldName, {limit:10});
+              const data2 = cache.readFragment(
+                gql`
+                  fragment ___ on Post {
+                    _id
+                    point
+                    upboots {
+                      value
+                    }
+                  }
+                `,
+                { _id: post_id }
+              );
+              console.log(data2);
+            }
+          },
+          createPost: (_result, args, cache, info) => {
+            invalidateAllArgFields("Query", "posts", cache);
           },
           logout: (_result, args, cache, info) => {
             beeterUpdateQuery<LogoutMutation, MeQuery>(
@@ -125,6 +161,7 @@ export const createUrqlClient = (ssrExchange: any) => ({
                 }
               }
             );
+            invalidateAllArgFields("Query", "posts", cache);
           },
           register: (_result, args, cache, info) => {
             beeterUpdateQuery<RegisterMutation, MeQuery>(

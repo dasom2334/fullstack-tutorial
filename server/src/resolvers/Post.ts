@@ -9,7 +9,7 @@ import {
   Query,
   Resolver,
   Root,
-  UseMiddleware
+  UseMiddleware,
 } from "type-graphql";
 import { QueryBuilder } from "typeorm";
 import { Post } from "../entities/Post";
@@ -34,7 +34,7 @@ export class PostResolver {
     return root.text.slice(0, 50);
   }
 
-  @Mutation(() => Boolean)
+  @Mutation(() => Int)
   async vote(
     @Arg("post_id", () => Int) post_id: number,
     @Arg("value", () => Int) value: number,
@@ -42,20 +42,19 @@ export class PostResolver {
   ) {
     const isUpdoot = value !== -1;
     const realValue = isUpdoot ? 1 : -1;
-    const { userId } = req.session;
-    // const { userId } = { userId: 1 };
-
+    const userId = req.session?.userId ?? 1;
+    console.log(userId);
     const updoot = await Updoot.findOne({
       where: { post_id, user_id: userId },
     });
 
     let isSafe = true;
+    let addPoint = 0;
 
     let qb = AppDataSource.createQueryBuilder() as QueryBuilder<Updoot>;
-    console.log(userId, updoot, updoot?.value, realValue, !updoot);
     if (updoot && updoot.value !== undefined) {
       if (updoot.value == realValue) {
-        return false;
+        return addPoint;
       }
       qb = qb
         .update(Updoot)
@@ -75,9 +74,10 @@ export class PostResolver {
       isSafe = false;
     });
     if (isSafe) {
-      let addPoint = realValue;
-      if (updoot) {
-        addPoint = addPoint == 1 ? 2 : -2;
+      if (updoot && updoot.value !== undefined) {
+        addPoint = realValue == 1 ? 2 : -2;
+      } else {
+        addPoint = realValue;
       }
       await AppDataSource.createQueryBuilder()
         .update(Post)
@@ -89,17 +89,19 @@ export class PostResolver {
           isSafe = false;
         });
     }
-    return isSafe;
+    return addPoint;
   }
 
   @Query(() => [Post])
   async posts(
     @Arg("limit") limit: number,
     @Arg("offset") offset: number = 0,
-    @Arg("cursor", () => String, { nullable: true }) cursor: string | null
+    @Arg("cursor", () => String, { nullable: true }) cursor: string | null,
+    @Ctx() { req }: MyContext
   ): Promise<Post[]> {
+    const userId = req.session?.userId ?? 1;
     const realLimit = Math.min(50, limit);
-    const result = AppDataSource.getRepository(Post)
+    let result = AppDataSource.getRepository(Post)
       .createQueryBuilder("Post")
       .leftJoinAndSelect(
         "Post.creator",
@@ -110,13 +112,23 @@ export class PostResolver {
       .addOrderBy("Post._id", "DESC")
       .offset(offset)
       .limit(realLimit);
+    if (userId) {
+      result = result.leftJoinAndSelect(
+        "Post.updoots",
+        "UserUpdoot",
+        `UserUpdoot.user_id = ${userId} 
+        AND Post._id = UserUpdoot.post_id`
+      );
+    }
     // .take(realLimit);
     if (cursor) {
-      result.where("Post.createdAt > :cursor", {
+      result = result.where("Post.createdAt > :cursor", {
         cursor: cursor ? new Date(cursor) : null,
       });
     }
     // console.log(await result.getRawMany());
+    // const data = await result.getMany();
+    // console.log(data[0]['updoots'], await result.getRawMany());
     return result.getMany();
   }
   @Query(() => Post, { nullable: true })

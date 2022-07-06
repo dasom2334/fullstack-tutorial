@@ -1,5 +1,9 @@
 query Posts($limit:Float!, $cursor:String, $offset:Float!) {
     posts(limit:$limit, cursor:$cursor, offset:$offset) {
         ...PostSnippet
+        updoots {
+            user_id
+            post_id
+        }
     }
 }
