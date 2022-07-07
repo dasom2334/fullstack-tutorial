@@ -32,6 +32,7 @@ export type Mutation = {
   login: UserResponse;
   logout: Scalars['Boolean'];
   register: UserResponse;
+  updatePost: Post;
   vote: Scalars['Int'];
 };
 
@@ -68,6 +69,12 @@ export type MutationRegisterArgs = {
 };
 
 
+export type MutationUpdatePostArgs = {
+  identifier: Scalars['Int'];
+  input: PostInput;
+};
+
+
 export type MutationVoteArgs = {
   post_id: Scalars['Int'];
   value: Scalars['Int'];
@@ -77,7 +84,7 @@ export type Post = {
   __typename?: 'Post';
   _id: Scalars['Float'];
   createdAt: Scalars['DateTime'];
-  creator: User;
+  creator?: Maybe<User>;
   creator_id: Scalars['Float'];
   point: Scalars['Float'];
   text: Scalars['String'];
@@ -99,7 +106,6 @@ export type Query = {
   me?: Maybe<User>;
   post?: Maybe<Post>;
   posts: Array<Post>;
-  updatePost: Post;
 };
 
 
@@ -112,12 +118,6 @@ export type QueryPostsArgs = {
   cursor?: InputMaybe<Scalars['String']>;
   limit: Scalars['Float'];
   offset: Scalars['Float'];
-};
-
-
-export type QueryUpdatePostArgs = {
-  identifier: Scalars['Int'];
-  input: PostInput;
 };
 
 export type Updoot = {
@@ -153,7 +153,7 @@ export type UsernamePasswordInput = {
   username: Scalars['String'];
 };
 
-export type PostSnippetFragment = { __typename?: 'Post', _id: number, createdAt: any, updatedAt: any, title: string, text: string, textSnippet: string, point: number, creator: { __typename?: 'User', _id: number, username: string, email: string }, updoots?: Array<{ __typename?: 'Updoot', _id: number, value: number, user?: { __typename?: 'User', _id: number, username: string, email: string } | null }> | null };
+export type PostSnippetFragment = { __typename?: 'Post', _id: number, createdAt: any, updatedAt: any, title: string, text: string, textSnippet: string, point: number, creator?: { __typename?: 'User', _id: number, username: string, email: string } | null, updoots?: Array<{ __typename?: 'Updoot', _id: number, value: number, user?: { __typename?: 'User', _id: number, username: string, email: string } | null }> | null };
 
 export type RegularErrorFragment = { __typename?: 'FieldError', field: string, message: string };
 
@@ -175,6 +175,13 @@ export type CreatePostMutationVariables = Exact<{
 
 
 export type CreatePostMutation = { __typename?: 'Mutation', createPost: { __typename?: 'Post', _id: number, createdAt: any, updatedAt: any, title: string, text: string, point: number, creator_id: number } };
+
+export type DeletePostMutationVariables = Exact<{
+  identifier: Scalars['Int'];
+}>;
+
+
+export type DeletePostMutation = { __typename?: 'Mutation', deletePost: boolean };
 
 export type ForgotPasswordMutationVariables = Exact<{
   email: Scalars['String'];
@@ -203,6 +210,14 @@ export type RegisterMutationVariables = Exact<{
 
 export type RegisterMutation = { __typename?: 'Mutation', register: { __typename?: 'UserResponse', errors?: Array<{ __typename?: 'FieldError', field: string, message: string }> | null, user?: { __typename?: 'User', _id: number, username: string, email: string } | null } };
 
+export type UpdatePostMutationVariables = Exact<{
+  identifier: Scalars['Int'];
+  input: PostInput;
+}>;
+
+
+export type UpdatePostMutation = { __typename?: 'Mutation', updatePost: { __typename?: 'Post', _id: number, createdAt: any, updatedAt: any, title: string, text: string, point: number, creator_id: number } };
+
 export type VoteMutationVariables = Exact<{
   value: Scalars['Int'];
   post_id: Scalars['Int'];
@@ -221,7 +236,7 @@ export type PostQueryVariables = Exact<{
 }>;
 
 
-export type PostQuery = { __typename?: 'Query', post?: { __typename?: 'Post', _id: number, createdAt: any, updatedAt: any, title: string, text: string, textSnippet: string, point: number, creator: { __typename?: 'User', _id: number, username: string, email: string }, updoots?: Array<{ __typename?: 'Updoot', _id: number, value: number, user?: { __typename?: 'User', _id: number, username: string, email: string } | null }> | null } | null };
+export type PostQuery = { __typename?: 'Query', post?: { __typename?: 'Post', _id: number, createdAt: any, updatedAt: any, title: string, text: string, textSnippet: string, point: number, creator?: { __typename?: 'User', _id: number, username: string, email: string } | null, updoots?: Array<{ __typename?: 'Updoot', _id: number, value: number, user?: { __typename?: 'User', _id: number, username: string, email: string } | null }> | null } | null };
 
 export type PostsQueryVariables = Exact<{
   limit: Scalars['Float'];
@@ -230,7 +245,7 @@ export type PostsQueryVariables = Exact<{
 }>;
 
 
-export type PostsQuery = { __typename?: 'Query', posts: Array<{ __typename?: 'Post', _id: number, createdAt: any, updatedAt: any, title: string, text: string, textSnippet: string, point: number, updoots?: Array<{ __typename?: 'Updoot', user_id: number, post_id: number, _id: number, value: number, user?: { __typename?: 'User', _id: number, username: string, email: string } | null }> | null, creator: { __typename?: 'User', _id: number, username: string, email: string } }> };
+export type PostsQuery = { __typename?: 'Query', posts: Array<{ __typename?: 'Post', _id: number, createdAt: any, updatedAt: any, title: string, text: string, textSnippet: string, point: number, updoots?: Array<{ __typename?: 'Updoot', user_id: number, post_id: number, _id: number, value: number, user?: { __typename?: 'User', _id: number, username: string, email: string } | null }> | null, creator?: { __typename?: 'User', _id: number, username: string, email: string } | null }> };
 
 export const RegularUserFragmentDoc = gql`
     fragment RegularUser on User {
@@ -305,6 +320,15 @@ export const CreatePostDocument = gql`
 export function useCreatePostMutation() {
   return Urql.useMutation<CreatePostMutation, CreatePostMutationVariables>(CreatePostDocument);
 };
+export const DeletePostDocument = gql`
+    mutation DeletePost($identifier: Int!) {
+  deletePost(identifier: $identifier)
+}
+    `;
+
+export function useDeletePostMutation() {
+  return Urql.useMutation<DeletePostMutation, DeletePostMutationVariables>(DeletePostDocument);
+};
 export const ForgotPasswordDocument = gql`
     mutation ForgotPassword($email: String!) {
   forgotPassword(email: $email)
@@ -344,6 +368,23 @@ export const RegisterDocument = gql`
 
 export function useRegisterMutation() {
   return Urql.useMutation<RegisterMutation, RegisterMutationVariables>(RegisterDocument);
+};
+export const UpdatePostDocument = gql`
+    mutation UpdatePost($identifier: Int!, $input: PostInput!) {
+  updatePost(identifier: $identifier, input: $input) {
+    _id
+    createdAt
+    updatedAt
+    title
+    text
+    point
+    creator_id
+  }
+}
+    `;
+
+export function useUpdatePostMutation() {
+  return Urql.useMutation<UpdatePostMutation, UpdatePostMutationVariables>(UpdatePostDocument);
 };
 export const VoteDocument = gql`
     mutation Vote($value: Int!, $post_id: Int!) {

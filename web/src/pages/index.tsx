@@ -3,21 +3,18 @@ import {
   Button,
   Flex,
   Heading,
-  Icon,
-  IconButton,
   Link,
   Stack,
   Text,
 } from "@chakra-ui/react";
 import { withUrqlClient } from "next-urql";
-import { usePostsQuery } from "../generated/graphql";
-import { createUrqlClient } from "../utils/createUrqlClient";
 import NextLink from "next/link";
-import { Layout } from "../components/Layout";
 import { useState } from "react";
-import { ChevronDownIcon, ChevronUpIcon } from "@chakra-ui/icons";
+import { EditDeletePostButton } from "../components/editDeletePostButton";
+import { Layout } from "../components/Layout";
 import { UpdootSection } from "../components/UpdootSection";
-import { isServer } from "../utils/isServer";
+import { useMeQuery, usePostsQuery } from "../generated/graphql";
+import { createUrqlClient } from "../utils/createUrqlClient";
 
 const Index = () => {
   const [variables, setVariables] = useState({
@@ -25,6 +22,7 @@ const Index = () => {
     offset: 0,
     cursor: null as null | string,
   });
+  const [{ data: meData }] = useMeQuery();
   const [{ data, fetching, error }] = usePostsQuery({
     variables,
     // pause: isServer,
@@ -32,7 +30,7 @@ const Index = () => {
   if (!fetching && !data) {
     return <div>You Got Query Failed For Some Reason.</div>;
   }
-  console.log(error);
+  // console.log(error);
   return (
     <Layout>
       <>
@@ -47,18 +45,27 @@ const Index = () => {
         ) : (
           <Box>
             <Stack spacing={8}>
-              {data?.posts.map((p) => (
-                <Flex key={p._id} p={5} shadow="md" borderWidth={1}>
-                  <UpdootSection post={p} />
-                  <Box ml={2}>
-                    <Heading fontSize="xl">
-                      <NextLink href={`/post/${p._id}`}>{p.title}</NextLink>
-                    </Heading>
-                    <Text>posted by {p.creator.username}</Text>
-                    <Text mt={4}>{p.textSnippet}</Text>
-                  </Box>
-                </Flex>
-              ))}
+              {data!.posts.map((p) =>
+                !p ? null : (
+                  <Flex key={p._id} p={5} shadow="md" borderWidth={1}>
+                    <UpdootSection post={p} />
+                    <Box ml={2} w="100%">
+                      <Heading fontSize="xl">
+                        <NextLink href={`/post/${p._id}`}>{p.title}</NextLink>
+                      </Heading>
+                      <Text>posted by {p.creator?.username}</Text>
+                      <Text flex={1} mt={4}>
+                        {p.textSnippet}
+                      </Text>
+                      {p.creator!._id == meData?.me?._id ? (
+                        <Flex pl="auto">
+                          <EditDeletePostButton post={p} />
+                        </Flex>
+                      ) : null}
+                    </Box>
+                  </Flex>
+                )
+              )}
             </Stack>
           </Box>
         )}

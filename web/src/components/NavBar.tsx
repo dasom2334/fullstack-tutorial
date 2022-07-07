@@ -17,31 +17,21 @@ export const NavBar: React.FC<NavBarProps> = ({}) => {
     body = <Flex>Check Loged in...</Flex>;
   } else if (!data?.me) {
     body = (
-      <Flex w="100%">
-        <Box my={"auto"}>
-          <NextLink href="/">
-            <Link textColor="white">
-              <Heading mr="auto">LiReddit</Heading>
-            </Link>
-          </NextLink>
-        </Box>
-
-        <Box ml={"auto"} my={"auto"}>
-          <NextLink href="/login">
-            <Link mr={2} textColor="white">
-              Login
-            </Link>
-          </NextLink>
-          <NextLink href="/register">
-            <Link textColor="white">Register</Link>
-          </NextLink>
-        </Box>
-      </Flex>
+      <Box ml={"auto"} my={"auto"}>
+        <NextLink href="/login">
+          <Link mr={2} textColor="white">
+            Login
+          </Link>
+        </NextLink>
+        <NextLink href="/register">
+          <Link textColor="white">Register</Link>
+        </NextLink>
+      </Box>
     );
   } else {
     body = (
-      <Flex>
-        <Box mr={2}>{data.me.username}</Box>
+      <Box ml={"auto"} my={"auto"}>
+        <Link mr={2}>{data.me.username}</Link>
         <Button
           onClick={() => {
             logout();
@@ -51,7 +41,7 @@ export const NavBar: React.FC<NavBarProps> = ({}) => {
         >
           Logout
         </Button>
-      </Flex>
+      </Box>
     );
   }
   return (
@@ -63,7 +53,17 @@ export const NavBar: React.FC<NavBarProps> = ({}) => {
       top={0}
       zIndex={100}
     >
-      {body}
+      <Flex w="100%">
+        <Box my={"auto"}>
+          <NextLink href="/">
+            <Link textColor="white">
+              <Heading mr="auto">LiReddit</Heading>
+            </Link>
+          </NextLink>
+        </Box>
+
+        {body}
+      </Flex>
     </Flex>
   );
 };

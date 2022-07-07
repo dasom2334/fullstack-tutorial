@@ -42,7 +42,7 @@ export class PostResolver {
   ) {
     const isUpdoot = value !== -1;
     const realValue = isUpdoot ? 1 : -1;
-    const {userId} = req.session;
+    const { userId } = req.session;
     const updoot = await Updoot.findOne({
       where: { post_id, user_id: userId },
     });
@@ -98,7 +98,7 @@ export class PostResolver {
     @Arg("cursor", () => String, { nullable: true }) cursor: string | null,
     @Ctx() { req }: MyContext
   ): Promise<Post[]> {
-    const {userId} = req.session;
+    const { userId } = req.session;
     const realLimit = Math.min(50, limit);
     let result = AppDataSource.getRepository(Post)
       .createQueryBuilder("Post")
@@ -133,13 +133,14 @@ export class PostResolver {
   @Query(() => Post, { nullable: true })
   post(@Arg("identifier", () => Int) _id: number): Promise<Post | null> {
     return AppDataSource.getRepository(Post)
-    .createQueryBuilder("Post")
-    .leftJoinAndSelect(
-      "Post.creator",
-      "Creator",
-      `Creator._id = Post.creator_id`
-    )
-    .where("Post._id = :_id", { _id }).getOne();
+      .createQueryBuilder("Post")
+      .leftJoinAndSelect(
+        "Post.creator",
+        "Creator",
+        `Creator._id = Post.creator_id`
+      )
+      .where("Post._id = :_id", { _id })
+      .getOne();
   }
   @Mutation(() => Post)
   @UseMiddleware(isAuth)
@@ -149,30 +150,36 @@ export class PostResolver {
   ): Promise<Post | null> {
     return Post.create({ ...input, creator_id: req.session.userId }).save();
   }
-  @Query(() => Post)
-  @UseMiddleware(isAuth)
+  @Mutation(() => Post)
+  // @UseMiddleware(isAuth)
   async updatePost(
     @Arg("identifier", () => Int) _id: number,
     @Arg("input") input: PostInput,
-    @Ctx() { req }: MyContext
+    // @Ctx() { req }: MyContext
   ): Promise<Post | null> {
     const post = await Post.findOneBy({ _id });
 
     if (!post) {
-      return null;
+      throw new Error('403 Error');
     }
-
-    if (post.creator_id !== req.session.userId) {
-      return null;
-    }
-    Post.update({ _id }, { ...input });
-    return post;
+    post.title = input.title;
+    post.text = input.text;
+    
+    return post.save();
   }
   @Mutation(() => Boolean)
   async deletePost(
-    @Arg("identifier", () => Int) _id: number
+    @Arg("identifier", () => Int) _id: number,
+    @Ctx() { req }: MyContext
   ): Promise<boolean> {
-    await Post.delete(_id);
+    const post = await Post.findOneBy({ _id });
+    if (!post) {
+      return false;
+    }
+    if (post.creator_id !== req.session.userId) {
+      throw new Error("not authorized");
+    }
+    await Post.delete({ _id });
     return true;
   }
 }

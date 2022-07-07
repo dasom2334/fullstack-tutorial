@@ -1,0 +1,11 @@
+mutation UpdatePost($identifier:Int!, $input:PostInput!) {
+    updatePost(identifier: $identifier, input:$input) {
+        _id
+        createdAt
+        updatedAt
+        title
+        text
+        point
+        creator_id
+    }
+}
