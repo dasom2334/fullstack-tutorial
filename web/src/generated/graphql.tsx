@@ -245,7 +245,7 @@ export type PostsQueryVariables = Exact<{
 }>;
 
 
-export type PostsQuery = { __typename?: 'Query', posts: Array<{ __typename?: 'Post', _id: number, createdAt: any, updatedAt: any, title: string, text: string, textSnippet: string, point: number, updoots?: Array<{ __typename?: 'Updoot', user_id: number, post_id: number, _id: number, value: number, user?: { __typename?: 'User', _id: number, username: string, email: string } | null }> | null, creator?: { __typename?: 'User', _id: number, username: string, email: string } | null }> };
+export type PostsQuery = { __typename?: 'Query', posts: Array<{ __typename?: 'Post', _id: number, createdAt: any, updatedAt: any, title: string, text: string, textSnippet: string, point: number, creator?: { __typename?: 'User', _id: number, username: string, email: string } | null, updoots?: Array<{ __typename?: 'Updoot', _id: number, value: number, user?: { __typename?: 'User', _id: number, username: string, email: string } | null }> | null }> };
 
 export const RegularUserFragmentDoc = gql`
     fragment RegularUser on User {
@@ -421,10 +421,6 @@ export const PostsDocument = gql`
     query Posts($limit: Float!, $cursor: String, $offset: Float!) {
   posts(limit: $limit, cursor: $cursor, offset: $offset) {
     ...PostSnippet
-    updoots {
-      user_id
-      post_id
-    }
   }
 }
     ${PostSnippetFragmentDoc}`;

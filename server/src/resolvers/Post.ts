@@ -1,3 +1,4 @@
+import { User } from "../entities/User";
 import {
   Arg,
   Ctx,
@@ -32,6 +33,19 @@ export class PostResolver {
   @FieldResolver(() => String)
   textSnippet(@Root() root: Post) {
     return root.text.slice(0, 50);
+  }
+
+  @FieldResolver(() => User)
+  creator(@Root() post: Post, @Ctx() { userLoader }: MyContext) {
+    return userLoader.load(post.creator_id);
+  }
+  @FieldResolver(() => User)
+  async updoots(@Root() post: Post, @Ctx() { updootLoader, req }: MyContext) {
+     const data = updootLoader.load({
+      post_id: post._id,
+      user_id: req.session.userId,
+    });
+    return [data];
   }
 
   @Mutation(() => Int)
@@ -96,29 +110,30 @@ export class PostResolver {
     @Arg("limit") limit: number,
     @Arg("offset") offset: number = 0,
     @Arg("cursor", () => String, { nullable: true }) cursor: string | null,
-    @Ctx() { req }: MyContext
+    // @Ctx() { req }: MyContext
   ): Promise<Post[]> {
-    const { userId } = req.session;
+    // const { userId } = req.session;
     const realLimit = Math.min(50, limit);
+
     let result = AppDataSource.getRepository(Post)
       .createQueryBuilder("Post")
-      .leftJoinAndSelect(
-        "Post.creator",
-        "Creator",
-        `Creator._id = Post.creator_id`
-      )
+      // .leftJoinAndSelect(
+      //   "Post.creator",
+      //   "Creator",
+      //   `Creator._id = Post.creator_id`
+      // )
       .orderBy("Post.createdAt", "DESC")
       .addOrderBy("Post._id", "DESC")
       .offset(offset)
       .limit(realLimit);
-    if (userId) {
-      result = result.leftJoinAndSelect(
-        "Post.updoots",
-        "UserUpdoot",
-        `UserUpdoot.user_id = ${userId} 
-        AND Post._id = UserUpdoot.post_id`
-      );
-    }
+    // if (userId) {
+    //   result = result.leftJoinAndSelect(
+    //     "Post.updoots",
+    //     "UserUpdoot",
+    //     `UserUpdoot.user_id = ${userId} 
+    //     AND Post._id = UserUpdoot.post_id`
+    //   );
+    // }
     // .take(realLimit);
     if (cursor) {
       result = result.where("Post.createdAt > :cursor", {
@@ -154,17 +169,17 @@ export class PostResolver {
   // @UseMiddleware(isAuth)
   async updatePost(
     @Arg("identifier", () => Int) _id: number,
-    @Arg("input") input: PostInput,
+    @Arg("input") input: PostInput
     // @Ctx() { req }: MyContext
   ): Promise<Post | null> {
     const post = await Post.findOneBy({ _id });
 
     if (!post) {
-      throw new Error('403 Error');
+      throw new Error("403 Error");
     }
     post.title = input.title;
     post.text = input.text;
-    
+
     return post.save();
   }
   @Mutation(() => Boolean)

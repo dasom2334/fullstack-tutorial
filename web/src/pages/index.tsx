@@ -30,6 +30,7 @@ const Index = () => {
   if (!fetching && !data) {
     return <div>You Got Query Failed For Some Reason.</div>;
   }
+  console.log(data);
   // console.log(error);
   return (
     <Layout>
@@ -57,7 +58,7 @@ const Index = () => {
                       <Text flex={1} mt={4}>
                         {p.textSnippet}
                       </Text>
-                      {p.creator!._id == meData?.me?._id ? (
+                      {p.creator?._id == meData?.me?._id ? (
                         <Flex pl="auto">
                           <EditDeletePostButton post={p} />
                         </Flex>
