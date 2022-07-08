@@ -47,8 +47,8 @@ current 11:09:23
 10:04:08 ~~Single Post~~<br>
 10:21:55 ~~Delete Post~~<br>
 10:38:19 ~~Edit Post~~<br>
-11:09:23 DataLoader<br>
-11:40:06 Cache Reset<br>
+11:09:23 ~~DataLoader~~<br>
+11:40:06 ~~Cache Reset~~<br>
 11:43:55 Deploy Backend<br>
 11:52:56 Docker<br>
 12:03:29 Environment Variables<br>

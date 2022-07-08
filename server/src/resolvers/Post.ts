@@ -39,7 +39,7 @@ export class PostResolver {
   creator(@Root() post: Post, @Ctx() { userLoader }: MyContext) {
     return userLoader.load(post.creator_id);
   }
-  @FieldResolver(() => User)
+  @FieldResolver(() => Updoot)
   async updoots(@Root() post: Post, @Ctx() { updootLoader, req }: MyContext) {
      const data = updootLoader.load({
       post_id: post._id,

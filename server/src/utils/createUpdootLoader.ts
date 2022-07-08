@@ -8,11 +8,11 @@ export const createUpdootLoader = () => {
         .getMany();
       const updootIdsToUpdoot: Record<string, Updoot> = {};
       updoots.forEach((updoot) => {
-        updootIdsToUpdoot[`${updoot.user_id}|${updoot.post_id}`] = updoot;
+        updootIdsToUpdoot[`${updoot.post_id}`] = updoot;
       });
 
       const data = keys.map(
-        (key) => updootIdsToUpdoot[`${key.user_id}|${key.post_id}`]
+        (key) => updootIdsToUpdoot[`${key.post_id}`]
       );
       console.log(updoots);
       console.log(updootIdsToUpdoot);
